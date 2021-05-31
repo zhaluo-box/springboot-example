@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e0ec98b3-00b1-4238-ba50-1959f3689ecc" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="checksumPolicy" value="WARN" />
+        <option name="mavenHome" value="C:/Develop_tool/Maven/apache-maven-3.3.9" />
+      </MavenGeneralSettings>
+    </option>
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="downloadDocsAutomatically" value="true" />
+        <option name="downloadSourcesAutomatically" value="true" />
+        <option name="importAutomatically" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="MavenRunner">
+    <option name="skipTests" value="true" />
+  </component>
+  <component name="ProjectId" id="1qT6XHedNHtKrrPpNlf1CCSUmmx" />
+  <component name="ProjectViewState">
+    <option name="abbreviatePackageNames" value="true" />
+    <option name="autoscrollToSource" value="true" />
+    <option name="compactDirectories" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+    <option name="showVisibilityIcons" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="C:/JDK/JDK8/jdk1.8/bin/jvisualvm.exe" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="project.structure.last.edited" value="Problems" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="MavenSettings" />
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="TestNG">
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e0ec98b3-00b1-4238-ba50-1959f3689ecc" name="Default Changelist" comment="" />
+      <created>1617091270926</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1617091270926</updated>
+      <workItem from="1617091272857" duration="666000" />
+      <workItem from="1617092035804" duration="1973000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state width="2005" height="273" key="GridCell.Tab.0.bottom" timestamp="1617094114841">
+      <screen x="0" y="0" width="2048" height="1122" />
+    </state>
+    <state width="2005" height="273" key="GridCell.Tab.0.bottom/0.0.2048.1122@0.0.2048.1122" timestamp="1617094114841" />
+    <state width="2005" height="273" key="GridCell.Tab.0.center" timestamp="1617094114841">
+      <screen x="0" y="0" width="2048" height="1122" />
+    </state>
+    <state width="2005" height="273" key="GridCell.Tab.0.center/0.0.2048.1122@0.0.2048.1122" timestamp="1617094114841" />
+    <state width="2005" height="273" key="GridCell.Tab.0.left" timestamp="1617094114841">
+      <screen x="0" y="0" width="2048" height="1122" />
+    </state>
+    <state width="2005" height="273" key="GridCell.Tab.0.left/0.0.2048.1122@0.0.2048.1122" timestamp="1617094114841" />
+    <state width="2005" height="273" key="GridCell.Tab.0.right" timestamp="1617094114841">
+      <screen x="0" y="0" width="2048" height="1122" />
+    </state>
+    <state width="2005" height="273" key="GridCell.Tab.0.right/0.0.2048.1122@0.0.2048.1122" timestamp="1617094114841" />
+    <state x="526" y="204" key="SettingsEditor" timestamp="1617091444773">
+      <screen x="0" y="0" width="2048" height="1122" />
+    </state>
+    <state x="526" y="204" key="SettingsEditor/0.0.2048.1122@0.0.2048.1122" timestamp="1617091444773" />
+    <state x="657" y="256" key="new project wizard" timestamp="1617091328815">
+      <screen x="0" y="0" width="2048" height="1122" />
+    </state>
+    <state x="657" y="256" key="new project wizard/0.0.2048.1122@0.0.2048.1122" timestamp="1617091328815" />
+  </component>
+</project>
