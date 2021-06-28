@@ -24,7 +24,7 @@ public class test {
         InputStream inputStream = new FileInputStream(file);
         ks.load(inputStream,"123456".toCharArray());
         ks.toString();
-        KeyManagerUtils.createClientKeyManager(ks,null,)
+//        KeyManagerUtils.createClientKeyManager(ks,null,)
 
         KeyStore.ProtectionParameter protParam =
                         new KeyStore.PasswordProtection("123456".toCharArray());
