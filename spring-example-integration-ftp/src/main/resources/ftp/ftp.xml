@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-ftp="http://www.springframework.org/schema/integration/ftp"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/integration
+       http://www.springframework.org/schema/integration/spring-integration.xsd
+       http://www.springframework.org/schema/integration/ftp
+       http://www.springframework.org/schema/integration/ftp/spring-integration-ftp.xsd">
+
+    <!-- ftp配置 -->
+    <context:property-placeholder location="classpath:ftp/ftp-dev.properties" ignore-unresolvable="true"/>
+
+    <int:channel id="channel">
+        <int:queue/>
+    </int:channel>
+
+    <bean id="ftpSessionFactory" class="org.springframework.integration.ftp.session.DefaultFtpSessionFactory">
+        <property name="host" value="${uc.ftp.host}"/>
+        <property name="port" value="${uc.ftp.port}"/>
+        <property name="username" value="${uc.ftp.username}"/>
+        <property name="password" value="${uc.ftp.password}"/>
+    </bean>
+
+    <bean id="cachingSessionFactory" class="org.springframework.integration.file.remote.session.CachingSessionFactory">
+        <constructor-arg ref="ftpSessionFactory"/>
+    </bean>
+
+    <int-ftp:outbound-channel-adapter id="ftpOutboundChannel" channel="channel" charset="UTF-8"
+                                      session-factory="ftpSessionFactory" auto-create-directory="true"
+                                      remote-directory-expression="@targetDir.get()" remote-file-separator="/">
+        <!--远程目录可变：remote-directory-expression="@targetDir.get()"-->
+        <int:poller fixed-rate="1000"/>
+        <int-ftp:request-handler-advice-chain>
+            <int:retry-advice/>
+        </int-ftp:request-handler-advice-chain>
+    </int-ftp:outbound-channel-adapter>
+
+    <!-- 重点在这，每次上传文件都会读取该对象的get方法返回值 -->
+    <bean id="targetDir" class="java.util.concurrent.atomic.AtomicReference">
+        <constructor-arg value="${remote.directory}"/>
+    </bean>
+
+</beans>

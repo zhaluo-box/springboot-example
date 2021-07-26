@@ -1,0 +1,4 @@
+《Spring Integration for AWS 2.5 goes GA》 https://spring.io/blog/2021/05/20/spring-integration-for-aws-2-5-goes-ga
+《Spring Boot 2.4.6 available now》 https://spring.io/blog/2021/05/20/spring-boot-2-4-6-available-now
+《Spring Boot 2.5 is now GA》 https://spring.io/blog/2021/05/20/spring-boot-2-5-is-now-ga
+《Spring Cloud 2020.0.3 (aka Ilford) Is Available》 https://spring.io/blog/2021/05/28/spring-cloud-2020-0-3-aka-ilford-is-available

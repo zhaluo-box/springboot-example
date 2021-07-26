@@ -1,0 +1,24 @@
+server:
+  port: 8002
+
+
+spring:
+  application:
+    name: item-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/file-reader
+    username: root
+    password: root
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 10
+
+
+shard:
+  sub-size: 2097152 # 分片大小
+  temp-path: /home/zhauo/dev_software/temp/writer/temp/
+  bigfile: /home/zhauo/dev_software/temp/writer/bigfile/
+
+
+trans:
+  url: http://localhost:8001/file/import/hook
