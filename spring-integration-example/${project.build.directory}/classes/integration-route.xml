@@ -10,11 +10,6 @@
     <int:message-history/>
 
     <!-- *****************************channel 了解     start-***********************************************************************                       -->
-    <!--    spring  integration default channel-->
-
-
-
-
     <int:channel id="">
         <int:dispatcher/>
         <int:interceptors>
@@ -27,6 +22,11 @@
     <int:channel id="">
         <int:queue/>
     </int:channel>
+
+    <int:publish-subscribe-channel id="pubSubChannel">
+
+    </int:publish-subscribe-channel>
+
     <int:channel-interceptor id=""></int:channel-interceptor>
     <!-- *****************************channel 了解     end  ***********************************************************************                       -->
 

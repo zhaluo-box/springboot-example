@@ -10,11 +10,6 @@
     <int:message-history/>
 
     <!-- *****************************channel 了解     start-***********************************************************************                       -->
-    <!--    spring  integration default channel-->
-
-
-
-
     <int:channel id="">
         <int:dispatcher/>
         <int:interceptors>
