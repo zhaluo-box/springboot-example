@@ -1,33 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int="http://www.springframework.org/schema/integration"
-       xmlns:int-http="http://www.springframework.org/schema/integration/http" xmlns:util="http://www.springframework.org/schema/util"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration" xmlns:int-http="http://www.springframework.org/schema/integration/http" xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
     http://www.springframework.org/schema/beans
     https://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
     http://www.springframework.org/schema/integration
     https://www.springframework.org/schema/integration/spring-integration.xsd
     http://www.springframework.org/schema/integration/http
     https://www.springframework.org/schema/integration/http/spring-integration-http.xsd
     http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
-">
+    ">
+
+
+    <context:property-placeholder location="application.properties"/>
 
     <bean class="com.example.integration.serviceactivator.HttpResponseServiceActivator" id="responseServiceActivator"/>
     <util:list id="converters">
-
+        <bean class="org.springframework.http.converter.FormHttpMessageConverter"/>
+        <ref bean="mappingJackson2HttpMessageConverter"/>
         <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
+        <bean class="org.springframework.integration.http.converter.MultipartAwareFormHttpMessageConverter">
+            <property name="charset" value="UTF-8"/>
+        </bean>
         <bean class="org.springframework.http.converter.StringHttpMessageConverter">
             <constructor-arg value="UTF-8"/>
             <property name="writeAcceptCharset" value="false"/>
         </bean>
-        <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>
     </util:list>
-    <int-http:inbound-gateway request-channel="channel1" path="/example/"
-                              request-payload-type="java.lang.String" supported-methods="POST" reply-channel="channel3"/>
+
+    <int:channel id="channel3"/>
+    <int-http:inbound-gateway request-channel="channel1" path="${test.inbound.path}"
+                              request-payload-type="java.lang.String" supported-methods="POST, PUT" reply-channel="channel3">
+        <int-http:request-mapping params="requiredParam=123" headers="AAA-Header" consumes="application/json" produces="text/plain"/>
+    </int-http:inbound-gateway>
     <int:service-activator input-channel="channel1" method="handle" id="httpResponseSA" ref="responseServiceActivator" output-channel="channel2"/>
     <int:channel id="channel1"/>
 
-    <int-http:outbound-gateway request-channel="channel2" reply-channel="channel3" url="http://localhost:9090/hello/" charset="UTF-8" extract-request-payload="false" message-converters="converters"  http-method="POST"/>
-
+    <!--  outbound gateway  http-method 只支持一种http请求方式，不同于 inbound gateway supported-methods 是支持多种请求方式的  -->
+    <int-http:outbound-gateway request-channel="channel2" reply-channel="channel3"
+                               url="${test.outbound.url}" charset="UTF-8"
+                               expected-response-type="java.lang.String"
+                               message-converters="converters"
+                               http-method="POST"/>
     <int:channel id="channel2"/>
-    <int:channel id="channel3"/>
+
+
+    <bean class="com.example.integration.transformer.PayloadTransformer" id="payloadTransformer"/>
+
+    <int:channel id="channel6"/>
+    <int-http:inbound-gateway path="${test.variable.inbound.path}" payload-expression="#pathVariables.var" supported-methods="GET"
+                              request-channel="channel4" reply-channel="channel6"/>
+    <int:channel id="channel4"/>
+    <int:transformer input-channel="channel4" ref="payloadTransformer" method="transform" id="payloadTrans" output-channel="channel5"/>
+    <int:channel id="channel5"/>
+    <int-http:outbound-gateway url="${test.variable.outbound.url}" http-method="GET" expected-response-type="java.lang.String"
+                               request-channel="channel5" reply-channel="channel6"/>
+
+
+    <!--    文件上传  -->
+    <int-http:inbound-gateway path="/files/" supported-methods="POST" request-channel="channel7" reply-channel="channel8"/>
+    <int:channel id="channel7"/>
+    <bean class="com.example.integration.transformer.CommonTransformer" id="commonTransformer"/>
+    <int-http:outbound-gateway url="http://localhost:9090/users/files/actions/upload/" http-method="POST"
+                               expected-response-type="java.lang.String" message-converters="converters"
+                               reply-channel="channel8" request-channel="channel9"/>
+    <int:channel id="channel8"/>
+    <int:transformer input-channel="channel7" output-channel="channel9" ref="commonTransformer" method="transform"/>
+    <int:channel id="channel9"/>
+
+
+    <!--   官方案例:  文件上传-->
+    <int-http:inbound-channel-adapter id="httpInboundAdapter"
+                                      channel="receiveChannel"
+                                      path="/test-file/"
+                                      supported-methods="POST"/>
+
+    <int:channel id="receiveChannel"/>
+
+    <int:service-activator input-channel="receiveChannel">
+        <bean class="com.example.integration.serviceactivator.MultipartReceiver"/>
+    </int:service-activator>
+
 </beans>

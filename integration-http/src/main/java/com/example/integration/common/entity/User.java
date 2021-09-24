@@ -1,4 +1,5 @@
-package com.example.integration.entity;
+package com.example.integration.common.entity;
+
 
 import lombok.Data;
 
@@ -10,5 +11,6 @@ import lombok.Data;
 @Data
 public class User {
 
-    private String NAME;
+    private String name;
+
 }
