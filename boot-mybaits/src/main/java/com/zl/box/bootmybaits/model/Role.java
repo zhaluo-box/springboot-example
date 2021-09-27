@@ -1,15 +1,17 @@
 package com.zl.box.bootmybaits.model;
 
+import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
 
+@Data
+@Entity
+@Table
 public class Role implements Serializable {
 
     private static final long serialVersionUID = -5755677482254160893L;
+
     /**
      * 编号
      */

@@ -5,7 +5,7 @@ spring:
   datasource:
     druid:
       druidClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/vertx-test?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+      url: jdbc:mysql://localhost:3306/boot-test?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
       username: root
       password: root
       #最大连接数
@@ -51,6 +51,11 @@ spring:
       ALLOW_SINGLE_QUOTES: true # 是否允许出现单引号,默认false
     # 枚举类JsonGenerator.Feature枚举类中的枚举属性为key，值为boolean设置jackson JsonGenerator特性，一般无需设置默认即可
     # JsonGenerator在jackson中负责编写json内容,具体特性请看JsonGenerator.Feature
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
 
 
 # mybatis 与 通用mapper
@@ -61,6 +66,8 @@ mybatis:
   configuration:
     lazy-loading-enabled: true
     aggressive-lazy-loading: false
+
+
 
 mapper:
 #  mappers: com.zl.box.bootmybaits.mapper
