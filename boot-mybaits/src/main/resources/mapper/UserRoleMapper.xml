@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zl.box.bootmybaits.mapper.UserRoleMapper" >
+  <resultMap id="BaseResultMap" type="com.zl.box.bootmybaits.model.UserRole" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="UID" property="uid" jdbcType="INTEGER" />
+    <id column="RID" property="rid" jdbcType="INTEGER" />
+  </resultMap>
+</mapper>
