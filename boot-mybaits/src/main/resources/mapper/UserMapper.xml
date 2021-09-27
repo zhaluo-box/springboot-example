@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zl.box.bootmybaits.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.zl.box.bootmybaits.model.User">
+
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="birthday" property="birthday" jdbcType="TIMESTAMP"/>
+        <result column="sex" property="sex" jdbcType="CHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="userAccountResultMap" type="UserAccountDto">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="address" property="address"/>
+        <result column="sex" property="sex"/>
+        <result column="birthday" property="birthday"/>
+        <!-- 一对多关联-->
+        <!--
+            property="accounts" 关联实体po对应的字段
+            ofType="account"  集合引用的泛型
+        -->
+        <collection property="accounts" ofType="account">
+            <id column="aid" property="id"/>
+            <result column="uid" property="uid"/>
+            <result column="money" property="money"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="roleLazyMap" type="UserRoleDto">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="address" property="address"/>
+        <result column="sex" property="sex"/>
+        <result column="birthday" property="birthday"/>
+        <collection property="roles" javaType="List" select="com.zl.box.bootmybaits.mapper.RoleMapper.findRoleByUid" column="id" >
+        </collection>
+    </resultMap>
+
+    <select id="findUserLazyLoadingRole" resultMap="roleLazyMap" >
+        <include refid="baseSeq"/>
+        limit 10
+    </select>
+
+    <sql id="baseSeq">
+        select * from user
+    </sql>
+    <!-- 查询关联角色 -->
+    <select id="selectRoles" resultType="com.zl.box.bootmybaits.model.Role" parameterType="int">
+        select r.ID id,r.ROLE_DESC roleDesc,r.ROLE_NAME roleName from role r left join user_role u on r.ID = u.RID where u.UID= #{id}
+    </select>
+
+    <!-- 统计 聚合函数-->
+    <select id="findTotal" resultType="integer" >
+        select count(1) from user
+    </select>
+    <!--模糊查询-->
+    <select id="selectUserLikeUsername" parameterType="string" resultMap="BaseResultMap">
+        <include refid="baseSeq"></include>
+        where username like concat('%',#{value},'%')
+    </select>
+    <!--删除用户-->
+    <delete id="deleteUserByKey" parameterType="integer">
+        delete from user where id = #{value}
+    </delete>
+    <!--查询-->
+    <select id="selectBySex" resultType="com.zl.box.bootmybaits.model.User" parameterType="string">
+        select * from user where sex = #{value}
+    </select>
+    <!-- 更新用户 -->
+    <update id="updateUserByKey" parameterType="com.zl.box.bootmybaits.model.User">
+        update user set username = #{username}, address=#{address} where id = #{id}
+    </update>
+
+    <select id="selectByUserVo" parameterType="com.zl.box.bootmybaits.model.vo.QueryVo" resultMap="BaseResultMap">
+        <include refid="baseSeq"></include> where username = #{user.username}
+    </select>
+    <select id="selectByUserVo2" parameterType="com.zl.box.bootmybaits.common.BaseQuery" resultMap="BaseResultMap">
+        <include refid="baseSeq"></include> where username = #{entity.username}
+    </select>
+
+    <!--  查询用户与关联账户 -->
+    <select id="selectUserAndAccount" resultMap="userAccountResultMap">
+        select a.id as aid, a.MONEY ,u.* from user u left join account a on u.id = a.UID limit 10
+    </select>
+</mapper>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zl.box.bootmybaits.mapper.AccountMapper">
+    <resultMap id="BaseResultMap" type="com.zl.box.bootmybaits.model.Account">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="ID" property="id" jdbcType="INTEGER"/>
+        <result column="UID" property="uid" jdbcType="INTEGER"/>
+        <result column="MONEY" property="money" jdbcType="DOUBLE"/>
+    </resultMap>
+
+    <!--
+    #     id  主键
+#     result 非主键列
+#     column  SQL 查询对应的列
+#     property  实体类对应的字段
+#     association 一对一的时候关联映射的实体  其中id 必须有
+    -->
+
+    <resultMap id="accountMap" type="AccountUserDto2">
+        <id column="aid" property="id"/>
+        <result column="uid" property="uid"/>
+        <result column="money" property="money"/>
+        <association property="user" javaType="user">
+            <id column="id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="sex" property="sex"/>
+            <result column="birthday" property="birthday"/>
+            <result column="address" property="address"/>
+        </association>
+    </resultMap>
+    <resultMap id="accountMap2" type="AccountUserDto2">
+        <id column="aid" property="id"/>
+        <result column="uid" property="uid"/>
+        <result column="money" property="money"/>
+        <association property="user" javaType="user">
+            <id column="id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="sex" property="sex"/>
+            <result column="birthday" property="birthday"/>
+            <result column="address" property="address"/>
+        </association>
+    </resultMap>
+
+    <select id="findAll1" resultMap="accountMap">
+        select u.*,a.id as aid,a.uid,a.money from account a,user u where a.uid =u.id order by u.id;
+    </select>
+
+    <!-- findAll3  与  findAll2 结果是一致的 -->
+    <select id="findAll3" resultMap="accountMap2">
+        select u.*,a.ID as aid, a.MONEY  from account a,user u where a.uid =u.id order by u.id;
+    </select>
+
+    <select id="findAll2" resultType="AccountUserDto">
+        SELECT
+            account.*,
+            user.username,
+            user.address
+        FROM
+            account,
+            user
+        WHERE account.uid = user.id
+  </select>
+</mapper>
