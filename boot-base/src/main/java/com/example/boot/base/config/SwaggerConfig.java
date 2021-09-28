@@ -1,4 +1,4 @@
-package com.zl.box.bootmybaits.config;
+package com.example.boot.base.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,7 @@ public class SwaggerConfig {
     public Docket createRestApi() {
         return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo())
                                                       .select()
-                                                      .apis(RequestHandlerSelectors.basePackage("com.zl.box.bootmybaits.web"))
+                                                      .apis(RequestHandlerSelectors.basePackage("com.example.boot.base.web"))
                                                       .paths(PathSelectors.any())
                                                       .build();
 
@@ -35,13 +35,13 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                         //标题
-                        .title("Spring Boot中使用Swagger2构建Restful APIs")
+                        .title("Swagger-Restful APIs")
                         //简介
                         .description("")
                         //服务条款
                         .termsOfServiceUrl("")
                         //作者个人信息
-                        // .contact(new Contact("aaa","","aaa@163.com"))
+                        //.contact(new Contact("aaa","","aaa@163.com"))
                         //版本
                         .version("1.0").build();
     }
