@@ -63,7 +63,7 @@ logging:
   level:
     root: info
     #    org.springframework.web: DEBUG
-    com.zl.box.bootmybaits.mapper: debug
+    com.example.boot.base: debug
   file:
     name: log/boot-base.log
 #  path: C:/logTemp/log
