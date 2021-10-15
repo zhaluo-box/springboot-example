@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:nest-endpoint="http://www.nestvision.com/nest/nest-endpoint"
+       xmlns:int="http://www.springframework.org/schema/integration" xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.nestvision.com/nest/nest-endpoint
+	http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+    <int:message-history/>
+
+    <!-- *****************************channel 了解     start-***********************************************************************                       -->
+    <bean class="com.zl.example.strategy.CustomChannelLoadBalancingStrategy" id="channelLoadBalance"/>
+
+    <int:channel id="directChannel">
+        <!--        channel 可以配置负载均衡  故障转移 -->
+        <!--        负载均衡可以自定义策略 实现 LoadBalancingStrategy 接口即可 -->
+        <!--        <int:dispatcher load-balancer="round-robin" load-balancer-ref="channelLoadBalance" failover="false"/>-->
+        <int:dispatcher load-balancer-ref="channelLoadBalance" failover="false"/>
+        <int:interceptors>
+            <beans:bean id="cusInterceptor" class="com.zl.example.interceptor.CustomChannelInterceptor"></beans:bean>
+            <beans:bean id="cusInterceptor" class="com.zl.example.interceptor.CustomChannelInterceptor"></beans:bean>
+            <beans:bean id="cusInterceptor" class="com.zl.example.interceptor.CustomChannelInterceptor"></beans:bean>
+        </int:interceptors>
+    </int:channel>
+
+    <!--     可以指定通道的数据类型 -->
+    <int:channel id="dataTypeChannel" datatype="java.lang.String"></int:channel>
+
+
+    <int:channel id="">
+        <int:dispatcher/>
+        <int:interceptors>
+
+        </int:interceptors>
+        <!-- <int:priority-queue/> -->
+    </int:channel>
+
+    <!-- 具备队列性质的通道 -->
+    <int:channel id="">
+        <int:queue/>
+    </int:channel>
+    <int:channel-interceptor id=""></int:channel-interceptor>
+    <!-- *****************************channel 了解     end  ***********************************************************************                       -->
+
+</beans>

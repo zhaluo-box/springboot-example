@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:nest-endpoint="http://www.nestvision.com/nest/nest-endpoint"
+       xmlns:int="http://www.springframework.org/schema/integration" xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.nestvision.com/nest/nest-endpoint
+	http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+    <int:message-history/>
+
+    <!-- *****************************channel 了解     start-***********************************************************************                       -->
+    <int:channel id="">
+        <int:dispatcher/>
+        <int:interceptors>
+
+        </int:interceptors>
+        <!-- <int:priority-queue/> -->
+    </int:channel>
+
+    <!-- 具备队列性质的通道 -->
+    <int:channel id="">
+        <int:queue/>
+    </int:channel>
+    <int:channel-interceptor id=""></int:channel-interceptor>
+    <!-- *****************************channel 了解     end  ***********************************************************************                       -->
+
+    <int:filter id="filter" method="" ref="" discard-channel="" output-channel="" throw-exception-on-rejection=""></int:filter>
+</beans>

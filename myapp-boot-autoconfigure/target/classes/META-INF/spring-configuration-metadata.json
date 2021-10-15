@@ -1,0 +1,17 @@
+{
+  "groups": [
+    {
+      "name": "hello",
+      "type": "com.zlb.example.HelloProperties",
+      "sourceType": "com.zlb.example.HelloProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "hello.suffix",
+      "type": "java.lang.String",
+      "sourceType": "com.zlb.example.HelloProperties"
+    }
+  ],
+  "hints": []
+}
