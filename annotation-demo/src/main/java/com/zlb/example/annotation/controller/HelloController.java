@@ -1,9 +1,7 @@
 package com.zlb.example.annotation.controller;
 
 
-import com.sun.org.apache.bcel.internal.generic.ARRAYLENGTH;
 import com.zlb.example.HelloService;
-import com.zlb.example.annotation.pool.MyThreadPool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
 
 @RestController
 @Slf4j
