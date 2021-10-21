@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 10086
 
 spring:
   datasource:
@@ -20,6 +20,8 @@ spring:
       timeBetweenEvictionRunsMillis: 60000
       #空闲连接最小空闲时间
       minEvictableIdleTimeMillis: 300000
+      filters: stat,wall,log4j,config
+
 
   jackson:
     # 设置属性命名策略,对应jackson下PropertyNamingStrategy中的常量值，SNAKE_CASE-返回的json驼峰式转下划线，json body下划线传到后端自动转驼峰式
