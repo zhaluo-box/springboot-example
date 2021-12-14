@@ -1,7 +1,7 @@
 package com.example.boot.base.web;
 
+import com.example.boot.base.common.entity.jpa.User;
 import com.example.boot.base.common.service.UserService;
-import com.example.boot.base.entity.jpa.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

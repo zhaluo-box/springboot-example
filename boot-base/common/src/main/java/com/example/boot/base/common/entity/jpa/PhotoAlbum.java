@@ -1,4 +1,4 @@
-package com.example.boot.base.entity.jpa;
+package com.example.boot.base.common.entity.jpa;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

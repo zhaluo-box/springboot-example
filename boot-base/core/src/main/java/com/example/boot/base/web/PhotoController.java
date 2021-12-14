@@ -1,6 +1,6 @@
 package com.example.boot.base.web;
 
-import com.example.boot.base.entity.jpa.PhotoItem;
+import com.example.boot.base.common.entity.jpa.PhotoItem;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;

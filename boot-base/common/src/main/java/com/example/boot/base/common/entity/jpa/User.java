@@ -1,4 +1,4 @@
-package com.example.boot.base.entity.jpa;
+package com.example.boot.base.common.entity.jpa;
 
 import com.example.boot.base.common.converts.MapConvert;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,7 +1,5 @@
 package com.example.boot.base.common.task;
 
-import com.example.boot.base.task.AbstractTaskTemplate;
-
 /**
  * 　定时任务管理器
  */

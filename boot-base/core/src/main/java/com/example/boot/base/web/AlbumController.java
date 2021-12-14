@@ -1,6 +1,6 @@
 package com.example.boot.base.web;
 
-import com.example.boot.base.entity.jpa.PhotoAlbum;
+import com.example.boot.base.common.entity.jpa.PhotoAlbum;
 import org.springframework.web.bind.annotation.*;
 
 /**

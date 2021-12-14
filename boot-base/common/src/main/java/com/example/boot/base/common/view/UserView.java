@@ -1,6 +1,6 @@
 package com.example.boot.base.common.view;
 
-import com.example.boot.base.entity.jpa.User;
+import com.example.boot.base.common.entity.jpa.User;
 
 import java.util.List;
 import java.util.Map;

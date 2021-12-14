@@ -1,4 +1,4 @@
-package base.bootstrap;
+package com.example.boot.base.bootstrap;
 
 /**
  *

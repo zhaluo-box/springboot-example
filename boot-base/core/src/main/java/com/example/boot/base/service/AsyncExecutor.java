@@ -1,7 +1,7 @@
 package com.example.boot.base.service;
 
+import com.example.boot.base.common.entity.jpa.User;
 import com.example.boot.base.common.view.UserView;
-import com.example.boot.base.entity.jpa.User;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

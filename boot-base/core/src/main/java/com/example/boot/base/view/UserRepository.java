@@ -1,6 +1,6 @@
 package com.example.boot.base.view;
 
-import com.example.boot.base.entity.jpa.User;
+import com.example.boot.base.common.entity.jpa.User;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 

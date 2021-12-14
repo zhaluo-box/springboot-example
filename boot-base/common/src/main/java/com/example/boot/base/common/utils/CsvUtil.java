@@ -10,11 +10,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/**
- * Created by MingZhe on 2021/11/12 09:9:28
- *
- * @author wmz
- */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CsvUtil {
