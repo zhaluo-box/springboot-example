@@ -58,6 +58,7 @@ spring:
     hibernate:
       ddl-auto: update
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    show-sql: true
 
 #日志配置
 #debug: true
