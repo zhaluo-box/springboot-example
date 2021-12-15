@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;

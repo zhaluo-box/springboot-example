@@ -1,5 +1,6 @@
 package com.example.boot.base.task;
 
+import com.example.boot.base.common.task.AbstractTaskTemplate;
 import org.springframework.stereotype.Service;
 
 /**

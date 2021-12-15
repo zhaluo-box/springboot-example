@@ -1,5 +1,8 @@
 package com.example.boot.base.common.converts;
 
+import com.example.boot.base.common.utils.JsonUtil;
+
+import javax.persistence.AttributeConverter;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")

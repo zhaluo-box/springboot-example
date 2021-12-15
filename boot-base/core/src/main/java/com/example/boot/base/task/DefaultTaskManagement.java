@@ -1,5 +1,7 @@
 package com.example.boot.base.task;
 
+import com.example.boot.base.common.task.AbstractTaskTemplate;
+import com.example.boot.base.common.task.TaskManagement;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;

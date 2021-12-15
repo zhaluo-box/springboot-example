@@ -1,6 +1,7 @@
 package com.example.boot.base.view;
 
 import com.example.boot.base.common.entity.jpa.User;
+import com.example.boot.base.common.view.UserView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
