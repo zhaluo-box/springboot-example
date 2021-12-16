@@ -4,6 +4,7 @@ import com.example.boot.base.common.entity.jpa.User;
 import com.example.boot.base.common.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,9 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/users/")
 public class UserController {
+
+    @Autowired
+    private List<HandlerMapping> handlerMapping;
 
     @Autowired
     private UserService userService;
@@ -46,4 +50,5 @@ public class UserController {
     public void addUser(@RequestBody User user) {
         userService.addUser(user);
     }
+
 }
