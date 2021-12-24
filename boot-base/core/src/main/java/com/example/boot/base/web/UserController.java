@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -37,10 +36,10 @@ public class UserController {
 
     }
 
-    @GetMapping
-    public List<Map<String, Object>> listAll(@RequestParam String username) {
-        return userService.findAllByUsername(username);
-    }
+    //    @GetMapping
+    //    public List<Map<String, Object>> listAll(@RequestParam String username) {
+    //        return userService.findAllByUsername(username);
+    //    }
 
     /**
      * 基于transactionTemplate 操作
