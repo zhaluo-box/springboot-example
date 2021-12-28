@@ -73,8 +73,8 @@ public class TestController {
      * 测试JDBCTemplate NamedParameters
      */
     @GetMapping("actions/test-jdbc-name-parameter-like/")
-    public List<Map<String, Object>> testJdbcNamedParameterLike(String name) {
-        final var querySql = "select * from user where username like '%'||:name||'%' ";
+    public List<Map<String, Object>> testJdbcNamedParameterLike(@RequestParam String name) {
+        final var querySql = "select * from user where username like '%' :name '%' ";
         var parameters = new HashMap<String, Object>();
         parameters.put("name", name);
         return namedParameterJdbcTemplate.queryForList(querySql, new CustomMapSqlParameterSource(parameters));

@@ -20,7 +20,7 @@ spring:
       timeBetweenEvictionRunsMillis: 60000
       #空闲连接最小空闲时间
       minEvictableIdleTimeMillis: 300000
-      filters: stat,wall,log4j,config
+  #      filters: stat,wall,log4j,config
 
 
   jackson:
