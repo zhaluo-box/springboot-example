@@ -32,7 +32,11 @@ public class KafkaTestController {
     @PostMapping("actions/produce-callback/")
     public void callback(@RequestBody Account account) {
         kafkaProduceService.callback(account);
+    }
 
+    @PostMapping("actions/batch-send/")
+    public void batchSend(@RequestBody Account account){
+        kafkaProduceService.batchSend();
     }
 
 }

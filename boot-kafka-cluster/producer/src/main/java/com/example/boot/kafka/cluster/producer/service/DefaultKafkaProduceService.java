@@ -3,6 +3,7 @@ package com.example.boot.kafka.cluster.producer.service;
 import com.example.boot.kafak.cluster.common.entity.Account;
 import com.example.boot.kafak.cluster.common.service.KafkaProduceService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -10,6 +11,8 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+
+import java.util.UUID;
 
 /**
  * Created  on 2021/12/28 21:21:43
@@ -27,9 +30,7 @@ public class DefaultKafkaProduceService implements KafkaProduceService {
 
     @Override
     public void sendMessage(Account account) {
-
         kafkaTemplate.send(TOPIC1, account.toString());
-
     }
 
     @Override
@@ -60,5 +61,12 @@ public class DefaultKafkaProduceService implements KafkaProduceService {
                 log.info("消息发送成功，元数据  ：{} ", result.getRecordMetadata());
             }
         });
+    }
+
+    @Override
+    public void batchSend() {
+        for (int i = 0; i < 10000; i++) {
+            kafkaTemplate.send(TOPIC1, RandomStringUtils.random(20));
+        }
     }
 }

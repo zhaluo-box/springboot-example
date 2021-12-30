@@ -12,4 +12,6 @@ public interface KafkaProduceService {
     void sendMessage(Account account);
 
     void callback(Account account);
+
+    void batchSend();
 }
