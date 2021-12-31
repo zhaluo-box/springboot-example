@@ -37,6 +37,7 @@ public class KafkaConsumerConfig {
         //        factory.getContainerProperties().setSyncCommits(false); 设置syncCommit 属性, 默认true 是同步提交, false 为默认提交
         // 被过滤的消息将被丢弃
         factory.setAckDiscarded(true);
+
         //消息过滤策略
         factory.setRecordFilterStrategy(consumerRecord -> {
             if (Integer.parseInt(consumerRecord.value().toString()) % 2 == 0) {

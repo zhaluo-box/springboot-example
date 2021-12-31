@@ -87,16 +87,17 @@ public class DefaultKafkaConsumerService implements KafkaConsumerService {
      */
     @KafkaListener(topics = { TopicConstants.TOPIC2 })
     public void asyncCommitOffset(ConsumerRecord<String, Object> record, Acknowledgment ack) {
+        try {
 
-        log.info("手动提交消息: {}", record);
-
-        ack.acknowledge();
-
-
-
+            log.info("手动提交消息: {}", record);
+        } catch (Exception e) {
+            // ack.nack(1000); 不建议采用nack 如过失败,再次拿出来还是会异常
+            // TODO  将消息投递到死信队列  后面分析问题, 重新处理
+        } finally {
+            System.out.println("do nothing");
+            // 最终还是确认了消息,并没有将消息放回!
+            ack.acknowledge();
+        }
     }
 
-    /**
-     * 异步提交
-     */
 }
