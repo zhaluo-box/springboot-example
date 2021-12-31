@@ -34,7 +34,7 @@ public class KafkaConsumerConfig {
 
         ConcurrentKafkaListenerContainerFactory factory = new ConcurrentKafkaListenerContainerFactory();
         factory.setConsumerFactory(consumerFactory);
-
+        //        factory.getContainerProperties().setSyncCommits(false); 设置syncCommit 属性, 默认true 是同步提交, false 为默认提交
         // 被过滤的消息将被丢弃
         factory.setAckDiscarded(true);
         //消息过滤策略

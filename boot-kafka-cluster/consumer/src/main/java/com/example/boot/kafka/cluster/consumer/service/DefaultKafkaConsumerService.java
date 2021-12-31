@@ -6,6 +6,7 @@ import com.example.boot.kafak.cluster.common.service.KafkaConsumerService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
 
@@ -79,5 +80,23 @@ public class DefaultKafkaConsumerService implements KafkaConsumerService {
 
     /**
      * 消费者组
+     */
+
+    /**
+     * 手动异步提交
+     */
+    @KafkaListener(topics = { TopicConstants.TOPIC2 })
+    public void asyncCommitOffset(ConsumerRecord<String, Object> record, Acknowledgment ack) {
+
+        log.info("手动提交消息: {}", record);
+
+        ack.acknowledge();
+
+
+
+    }
+
+    /**
+     * 异步提交
      */
 }
