@@ -1,9 +1,11 @@
 package com.example.boot.kafka.cluster.producer.service;
 
+import com.example.boot.kafak.cluster.common.constant.TopicConstants;
 import com.example.boot.kafak.cluster.common.entity.Account;
 import com.example.boot.kafak.cluster.common.service.KafkaProduceService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -13,6 +15,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created  on 2021/12/28 21:21:43
@@ -64,9 +67,40 @@ public class DefaultKafkaProduceService implements KafkaProduceService {
     }
 
     @Override
-    public void batchSend() {
+    public void batchSend(Account account) {
+        System.out.println(account);
         for (int i = 0; i < 10000; i++) {
             kafkaTemplate.send(TOPIC1, RandomStringUtils.random(20));
+        }
+    }
+
+    @Override
+    public void syncSend() {
+        try {
+            kafkaTemplate.send(TopicConstants.TOPIC2, "同步发送消息: " + RandomStringUtils.random(10)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("同步发送异常 ", e);
+        }
+    }
+
+    /**
+     * kafka事务测试
+     */
+    @Override
+    public void testTransaction() {
+
+        kafkaTemplate.executeInTransaction(operations -> {
+            operations.send(TopicConstants.TOPIC2, "事务测试消息!,开启事务l");
+            throw new RuntimeException("事务测试异常! ignored");
+        });
+
+        kafkaTemplate.send(TOPIC1, "事务测试消息,没有开启事务");
+    }
+
+    @Override
+    public void messageFilter() {
+        for (int i = 0; i < 10000; i++) {
+            kafkaTemplate.send(TOPIC1, i + "");
         }
     }
 }

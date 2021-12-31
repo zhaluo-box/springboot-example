@@ -13,5 +13,11 @@ public interface KafkaProduceService {
 
     void callback(Account account);
 
-    void batchSend();
+    void batchSend(Account account);
+
+    void syncSend();
+
+    void testTransaction();
+
+    void messageFilter();
 }
