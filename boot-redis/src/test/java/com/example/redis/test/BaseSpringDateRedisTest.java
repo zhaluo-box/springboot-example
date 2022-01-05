@@ -1,6 +1,5 @@
 package com.example.redis.test;
 
-
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +12,6 @@ public class BaseSpringDateRedisTest {
 
     @Autowired
     protected RedisTemplate<String, Object> redisTemplate;
-
 
     public ValueOperations<String, Object> getForValue() {
         return redisTemplate.opsForValue();

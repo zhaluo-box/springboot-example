@@ -9,7 +9,7 @@
     <name>boot-redis</name>
     <description>Demo project for Spring Boot</description>
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
         <start-class>com.example.redis.BootRedisApplication</start-class>
         <!-- 根据官方文档配置以后，可以不再单独配置maven-compiler-plugin插件-->
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -24,6 +24,22 @@
 
         <!-- TODO 引入redission       -->
 
+        <!--        <dependency>-->
+        <!--            <groupId></groupId>-->
+        <!--            <artifactId>redisson</artifactId>-->
+        <!--        </dependency>-->
+        <!-- redisson -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.5.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.9.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

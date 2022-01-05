@@ -14,13 +14,13 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisCacheConfig {
 
-
-
+    // 缓存设置
 
     /**
      * redis 设置
      */
     @Bean
+    @SuppressWarnings("all")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory jedisConnectionFactory) {
         //        RedisTemplate<String, Object> template = new RedisTemplate<String, Object>();
         //        template.setConnectionFactory(factory);
@@ -51,9 +51,10 @@ public class RedisCacheConfig {
         // hash的key也采用String的序列化方式
         template.setHashKeySerializer(stringRedisSerializer);
         // value序列化方式采用jackson
-        template.setValueSerializer(jackson2JsonRedisSerializer);
+        template.setValueSerializer(stringRedisSerializer);
         // hash的value序列化方式采用jackson
         template.setHashValueSerializer(jackson2JsonRedisSerializer);
+        template.setDefaultSerializer(stringRedisSerializer);
         template.afterPropertiesSet();
         return template;
 

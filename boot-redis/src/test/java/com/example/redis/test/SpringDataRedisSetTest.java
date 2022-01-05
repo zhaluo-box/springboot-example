@@ -2,15 +2,13 @@ package com.example.redis.test;
 
 import com.example.redis.utils.RandomValue;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.SetOperations;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 public class SpringDataRedisSetTest extends BaseSpringDateRedisTest {
@@ -29,6 +27,8 @@ public class SpringDataRedisSetTest extends BaseSpringDateRedisTest {
 
     protected static final String SET_INNERTHREE = "set:key:inner:three";
 
+    private SetOperations<String, Object> setOperations;
+
     //@Before
     public void initSetKey() {
         int length = 5;
@@ -40,6 +40,11 @@ public class SpringDataRedisSetTest extends BaseSpringDateRedisTest {
             getForSet().add(SET_KEY2,
                             new String[] { RandomValue.getChineseName(), RandomValue.getEmail(3, 20), RandomValue.getRoad(), RandomValue.getNum(10, 99) + "" });
         }
+    }
+
+    @Before
+    public void init() {
+        setOperations = getForSet();
     }
 
     /**
@@ -188,6 +193,105 @@ public class SpringDataRedisSetTest extends BaseSpringDateRedisTest {
             getForSet().add("set:key:six", i + "");
         }
 
+    }
+
+    /**
+     * 求取交集的 sourceKeyOne
+     */
+    private static final String SOURCE_KEY_ONE = "set:source:key:one";
+
+    private static final String SOURCE_KEY_TWO = "set:source:key:two";
+
+    private static final List<String> SOURCE_KEYS = List.of(SOURCE_KEY_ONE, SOURCE_KEY_TWO);
+
+    /**
+     * 求取交集后并存放的目标key
+     */
+    private static final String INTERSECT_STORE_DEST_KEY = "set:intersect:dest:key";
+
+    /**
+     * 求取差集后并发的目标key
+     */
+    private static final String DIFFERENT_STORE_DEST_KEY = "set:difference:dest:key";
+
+    /**
+     * 求取交集
+     */
+    @Test
+    public void intersect() {
+
+        var setOperations = getForSet();
+
+        initSourceKey();
+
+        var intersect = setOperations.intersect(SOURCE_KEY_ONE, SOURCE_KEY_TWO);
+
+        System.out.println("keyOne  与 keyTwo 的交集 : " + intersect);
+
+        List<String> sourceKeys = new ArrayList<>(2);
+        sourceKeys.add(SOURCE_KEY_ONE);
+        sourceKeys.add(SOURCE_KEY_TWO);
+
+        var intersections = intersectStoreOtherKey(setOperations, sourceKeys, INTERSECT_STORE_DEST_KEY);
+        System.out.println("keyOne keyTwo 交集目标key的数据:" + intersections);
+
+        destroySourceKey();
+    }
+
+    /**
+     * 求取交集并存放到另一个key
+     */
+    private <T> Set<T> intersectStoreOtherKey(SetOperations<String, T> setOperations, Collection<String> sourceKeys, String targetKey) {
+
+        setOperations.intersectAndStore(sourceKeys, targetKey);
+
+        return setOperations.members(targetKey);
+
+    }
+
+    /**
+     * 求取差集
+     */
+    @Test
+    public void difference() {
+        initSourceKey();
+        var difference = setOperations.difference(SOURCE_KEYS);
+        System.out.println("差集:" + difference);
+        var diffObjects = differenceStoreTargetKey(SOURCE_KEYS, DIFFERENT_STORE_DEST_KEY);
+        System.out.println("差集目标key : " + diffObjects);
+        destroySourceKey();
+    }
+
+    /**
+     * 求取交集并存放到另一个key
+     */
+    private Set<Object> differenceStoreTargetKey(Collection<String> sourceKeys, String targetKey) {
+        setOperations.differenceAndStore(sourceKeys, targetKey);
+        return setOperations.members(targetKey);
+    }
+
+    /**
+     * 求取并集的key
+     */
+
+    private void initSourceKey() {
+        var setOperations = getForSet();
+
+        // 向keyOne keyTwo 放入数据
+        String[] valueOne = new String[] { "1", "2", "3" };
+        String[] valueTwo = new String[] { "2", "3", "4", "5" };
+        setOperations.add(SOURCE_KEY_ONE, valueOne);
+        setOperations.add(SOURCE_KEY_TWO, valueTwo);
+
+        System.out.println("keyOne 的值 " + setOperations.members(SOURCE_KEY_ONE));
+        System.out.println("keyTwo 的值 " + setOperations.members(SOURCE_KEY_TWO));
+    }
+
+    private void destroySourceKey() {
+        var setOperations = getForSet();
+        // 测试前先移除两个key 的值
+        setOperations.remove(SOURCE_KEY_ONE, Objects.requireNonNull(setOperations.members(SOURCE_KEY_ONE)).toArray());
+        setOperations.remove(SOURCE_KEY_TWO, Objects.requireNonNull(setOperations.members(SOURCE_KEY_TWO)).toArray());
     }
 
 }
