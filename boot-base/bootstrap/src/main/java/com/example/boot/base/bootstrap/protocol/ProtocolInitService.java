@@ -36,6 +36,7 @@ public class ProtocolInitService implements BootstrapService {
             final Field lockField = URL.class.getDeclaredField("streamHandlerLock");
             lockField.setAccessible(true);
             synchronized (lockField.get(null)) {
+                //  这里取到的是tomcat 下的协议和JDK已经注册好的协议
                 final URLStreamHandlerFactory originalUrlStreamHandlerFactory = (URLStreamHandlerFactory) factoryField.get(null);
                 factoryField.set(null, null); // setURLStreamHandlerFactory 会检查factory 是否为null
                 URL.setURLStreamHandlerFactory(protocol -> {

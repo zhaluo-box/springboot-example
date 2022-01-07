@@ -10,6 +10,6 @@ import org.springframework.core.Ordered;
 public interface BootstrapService extends ApplicationListener<ApplicationReadyEvent>, Ordered {
 
     enum Order {
-        PROTOCOL
+        PROTOCOL, EVENT
     }
 }
