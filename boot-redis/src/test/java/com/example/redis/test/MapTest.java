@@ -90,9 +90,6 @@ public class MapTest {
 
     /**
      * 实体类转换为map集合
-     *
-     * @param object
-     * @return
      */
     public static Map objectToMap(Object object) {
 

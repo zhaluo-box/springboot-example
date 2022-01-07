@@ -10,11 +10,20 @@ spring:
     database: 0
     host: 192.168.13.129
     port: 6379
-    jedis:
+    lettuce:
       pool:
         max-active: 8
         max-wait: -1
         max-idle: 10
         min-idle: 0
     timeout: 2000ms
-    client-type: jedis
+    client-type: lettuce
+  cache:
+    type: redis
+    redis:
+      time-to-live: 360000    # 设置缓存
+      key-prefix: CACHE_      # 指定默认前缀，如果此处我们指定了前缀则使用我们指定的前缀，推荐此处不指定前缀
+      use-key-prefix: true    # 是否开启前缀, 建议开启
+      cache-null-values: true # 是否缓存控制, 防止缓存穿透
+    cache-names: user
+

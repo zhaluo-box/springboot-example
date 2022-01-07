@@ -221,20 +221,14 @@ public class SpringDataRedisSetTest extends BaseSpringDateRedisTest {
     public void intersect() {
 
         var setOperations = getForSet();
-
         initSourceKey();
-
         var intersect = setOperations.intersect(SOURCE_KEY_ONE, SOURCE_KEY_TWO);
-
         System.out.println("keyOne  与 keyTwo 的交集 : " + intersect);
-
         List<String> sourceKeys = new ArrayList<>(2);
         sourceKeys.add(SOURCE_KEY_ONE);
         sourceKeys.add(SOURCE_KEY_TWO);
-
         var intersections = intersectStoreOtherKey(setOperations, sourceKeys, INTERSECT_STORE_DEST_KEY);
         System.out.println("keyOne keyTwo 交集目标key的数据:" + intersections);
-
         destroySourceKey();
     }
 
@@ -273,7 +267,6 @@ public class SpringDataRedisSetTest extends BaseSpringDateRedisTest {
     /**
      * 求取并集的key
      */
-
     private void initSourceKey() {
         var setOperations = getForSet();
 
