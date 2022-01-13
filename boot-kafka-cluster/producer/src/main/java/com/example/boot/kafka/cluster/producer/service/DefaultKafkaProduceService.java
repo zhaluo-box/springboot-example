@@ -26,19 +26,17 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class DefaultKafkaProduceService implements KafkaProduceService {
 
-    private static final String TOPIC1 = "topic1";
-
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public void sendMessage(Account account) {
-        kafkaTemplate.send(TOPIC1, account.toString());
+        kafkaTemplate.send(TopicConstants.TOPIC, account.toString());
     }
 
     @Override
     public void callback(Account account) {
-        kafkaTemplate.send(TOPIC1, account.getAddress()).addCallback(success -> {
+        kafkaTemplate.send(TopicConstants.TOPIC, account.getAddress()).addCallback(success -> {
             Assert.notNull(success, "success is null!");
             // 消息发送到的topic
             String topic = success.getRecordMetadata().topic();
@@ -52,25 +50,26 @@ public class DefaultKafkaProduceService implements KafkaProduceService {
             System.out.println("失败的异常信息： " + failure.getMessage());
         });
 
-        kafkaTemplate.send(new ProducerRecord<>(TOPIC1, account.getName())).addCallback(new ListenableFutureCallback<SendResult<String, Object>>() {
-            @Override
-            public void onFailure(Throwable ex) {
-                log.error("消息发送失败", ex);
-            }
+        kafkaTemplate.send(new ProducerRecord<>(TopicConstants.TOPIC, account.getName()))
+                     .addCallback(new ListenableFutureCallback<SendResult<String, Object>>() {
+                         @Override
+                         public void onFailure(Throwable ex) {
+                             log.error("消息发送失败", ex);
+                         }
 
-            @Override
-            public void onSuccess(SendResult<String, Object> result) {
-                log.info("消息发送成功，消息内容：{} ", result.getProducerRecord());
-                log.info("消息发送成功，元数据  ：{} ", result.getRecordMetadata());
-            }
-        });
+                         @Override
+                         public void onSuccess(SendResult<String, Object> result) {
+                             log.info("消息发送成功，消息内容：{} ", result.getProducerRecord());
+                             log.info("消息发送成功，元数据  ：{} ", result.getRecordMetadata());
+                         }
+                     });
     }
 
     @Override
     public void batchSend(Account account) {
         System.out.println(account);
         for (int i = 0; i < 10000; i++) {
-            kafkaTemplate.send(TOPIC1, RandomStringUtils.random(20));
+            kafkaTemplate.send(TopicConstants.TOPIC, i + "");
         }
     }
 
@@ -94,13 +93,13 @@ public class DefaultKafkaProduceService implements KafkaProduceService {
             throw new RuntimeException("事务测试异常! ignored");
         });
 
-        kafkaTemplate.send(TOPIC1, "事务测试消息,没有开启事务");
+        kafkaTemplate.send(TopicConstants.TOPIC, "事务测试消息,没有开启事务");
     }
 
     @Override
     public void messageFilter() {
         for (int i = 0; i < 10000; i++) {
-            kafkaTemplate.send(TOPIC1, i + "");
+            kafkaTemplate.send(TopicConstants.TOPIC, i + "");
         }
     }
 }

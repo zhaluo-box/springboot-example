@@ -31,6 +31,9 @@ public class KafkaTestController {
         kafkaProduceService.callback(account);
     }
 
+    /**
+     * 批量发送
+     */
     @PostMapping("actions/batch-send/")
     public void batchSend(@RequestBody Account account) {
         kafkaProduceService.batchSend(account);
@@ -56,7 +59,7 @@ public class KafkaTestController {
      * 消息过滤
      */
     @GetMapping
-    public void messageFilter(){
+    public void messageFilter() {
         kafkaProduceService.messageFilter();
     }
 

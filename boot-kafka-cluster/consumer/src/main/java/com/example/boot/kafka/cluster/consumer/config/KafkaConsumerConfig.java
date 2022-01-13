@@ -40,6 +40,7 @@ public class KafkaConsumerConfig {
 
         //消息过滤策略
         factory.setRecordFilterStrategy(consumerRecord -> {
+            // 偶数消息直接过滤
             if (Integer.parseInt(consumerRecord.value().toString()) % 2 == 0) {
                 return false;
             }

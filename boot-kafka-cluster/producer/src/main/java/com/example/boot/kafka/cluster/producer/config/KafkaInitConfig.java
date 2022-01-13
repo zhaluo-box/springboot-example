@@ -12,9 +12,12 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class KafkaInitConfig {
 
+    /**
+     *  新建一个topic1
+     */
     @Bean
     public NewTopic initialTopic() {
-        return new NewTopic("topic1", 6, (short) 3);
+        return new NewTopic(TopicConstants.TOPIC, 6, (short) 3);
     }
 
     @Bean
