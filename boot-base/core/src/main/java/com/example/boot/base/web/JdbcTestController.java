@@ -16,6 +16,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -26,7 +27,7 @@ import java.util.*;
 @Slf4j
 @RestController
 @RequestMapping("/tests/")
-public class TestController {
+public class JdbcTestController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -35,7 +36,7 @@ public class TestController {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
-    private HandlerMapping handlerMapping;
+    private RequestMappingHandlerMapping handlerMapping;
 
     @GetMapping
     public void testListParamForGetRequest(@RequestParam List<User> users) {
