@@ -3,6 +3,7 @@ package com.example.boot.base.service;
 import com.example.boot.base.common.service.AsyncService;
 import com.example.boot.base.common.view.UserView;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 @Service
 @Transactional
-public class DefaultAsyncService implements AsyncService, InitializingBean {
+public class DefaultAsyncService implements AsyncService, InitializingBean, DisposableBean {
 
     @Autowired
     private UserView userView;
@@ -29,6 +30,13 @@ public class DefaultAsyncService implements AsyncService, InitializingBean {
         executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
+    @Override
+    public void destroy() throws Exception {
+        if (executorService != null) {
+            executorService.shutdown();
+        }
+    }
+
     /**
      * 测试目的
      * 主要测试事务
@@ -36,10 +44,9 @@ public class DefaultAsyncService implements AsyncService, InitializingBean {
      */
     @Override
     public void runTask() {
-
         var asyncExecutor = new AsyncExecutor(userView);
         executorService.execute(asyncExecutor);
-
+        executorService.submit(asyncExecutor);
     }
 
 }
