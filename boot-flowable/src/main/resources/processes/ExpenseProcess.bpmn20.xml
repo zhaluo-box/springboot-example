@@ -7,23 +7,29 @@
     <process id="Expense" name="ExpenseProcess" isExecutable="true">
         <documentation>报销流程</documentation>
         <startEvent id="start" name="开始"/>
+
         <userTask id="fillTask" name="出差报销" flowable:assignee="${taskUser}">
             <extensionElements>
                 <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler">
                     <![CDATA[false]]></modeler:initiator-can-complete>
             </extensionElements>
         </userTask>
+
         <exclusiveGateway id="judgeTask"/>
+
         <userTask id="directorTak" name="经理审批">
             <extensionElements>
                 <flowable:taskListener event="create" class="com.example.boot.flowable.handler.ManagerTaskHandler"/>
             </extensionElements>
         </userTask>
+
+        <!--  用户任务  userTask     -->
         <userTask id="bossTask" name="老板审批">
             <extensionElements>
                 <flowable:taskListener event="create" class="com.example.boot.flowable.handler.BossTaskHandler"/>
             </extensionElements>
         </userTask>
+
         <endEvent id="end" name="结束"/>
         <sequenceFlow id="directorNotPassFlow" name="驳回" sourceRef="directorTak" targetRef="fillTask">
             <conditionExpression xsi:type="tFormalExpression"><![CDATA[${outcome=='驳回'}]]></conditionExpression>
@@ -46,6 +52,8 @@
             <conditionExpression xsi:type="tFormalExpression"><![CDATA[${money <= 500}]]></conditionExpression>
         </sequenceFlow>
     </process>
+
+    <!--  只是一些元素坐标  -->
     <bpmndi:BPMNDiagram id="BPMNDiagram_Expense">
         <bpmndi:BPMNPlane bpmnElement="Expense" id="BPMNPlane_Expense">
             <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">

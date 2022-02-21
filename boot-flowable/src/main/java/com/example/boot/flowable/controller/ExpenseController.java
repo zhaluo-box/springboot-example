@@ -69,7 +69,7 @@ public class ExpenseController {
      * @param taskId 任务ID
      */
     @RequestMapping(value = "apply")
-    public String apply(String taskId) {
+    public String approval(String taskId) {
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         if (task == null) {
             throw new RuntimeException("流程不存在");
