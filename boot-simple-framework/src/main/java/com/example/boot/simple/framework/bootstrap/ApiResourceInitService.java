@@ -60,7 +60,7 @@ public class ApiResourceInitService implements BootstrapService {
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class MethodUtil {
+    static class MethodUtil {
 
         public static String getMethodDescription(Method method) {
             var args = Stream.of(method.getParameters()).map(p -> p.getType().getName()).collect(Collectors.joining(","));
