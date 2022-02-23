@@ -1,5 +1,7 @@
 package com.example.boot.simple.framework.config;
 
+import com.example.boot.simple.framework.config.intercetpor.AuditLogInterceptor;
+import com.example.boot.simple.framework.config.intercetpor.AuthInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -28,6 +30,10 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        WebMvcConfigurer.super.addInterceptors(registry);
+
+        // 注册认证过过滤拦截器
+        registry.addInterceptor(new AuthInterceptor()).excludePathPatterns("/systems/actions/logout/", "/systems/actions/login/");
+        // 注册审计日志拦截器
+        registry.addInterceptor(new AuditLogInterceptor());
     }
 }
