@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ApproveRunningHistory extends ApproveConfig {
+public class ApproveRunningHistory extends ApproveNodeConfig {
 
     /**
      * 审批意见
