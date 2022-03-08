@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 /**
  * 审批实例
  * Created  on 2022/2/24 17:17:19
@@ -14,9 +16,9 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(of = "id")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ApproveInstance extends BaseEntity {
+public class ApproveInstance {
 
     private long id;
 
@@ -36,12 +38,34 @@ public class ApproveInstance extends BaseEntity {
     private int approveModelVersion;
 
     /**
+     * TODO  目前实例不保存 URI与 detailId ,但是如果业务发生了变化，URI与DetailId 会导致历史审批界面打不开
      * 参数【通常不建议传递复杂JSON由具体业务决定，目前建议传输ID 即可，自己做类型转换】
      */
     private String param;
 
-    // TODO  目前实例不保存 URI与 detailId ,但是如果业务发生了变化，URI与DetailId 会导致历史审批界面打不开
+    /**
+     * 审批发起人
+     */
+    private String initiator;
 
-    // 审批实例发起人
+    /**
+     * 审批发起时间
+     */
+    private Date initiateTime;
+
+    /**
+     * 发起原因
+     */
+    private String reason;
+
+    /**
+     * 下一级待审批节点Id
+     */
+    private long nextNodeId;
+
+    /**
+     * 下一级审批节点名称
+     */
+    private String nextNodeName;
 
 }

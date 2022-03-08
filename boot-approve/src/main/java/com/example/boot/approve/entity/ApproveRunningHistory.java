@@ -1,5 +1,6 @@
 package com.example.boot.approve.entity;
 
+import com.example.boot.approve.enums.ApproveResult;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -41,7 +42,7 @@ public class ApproveRunningHistory extends ApproveNodeConfig {
     /**
      * 审批状态
      */
-    private ApproveOpinion status;
+    private ApproveResult approveResult;
 
     /**
      * 转办标记
