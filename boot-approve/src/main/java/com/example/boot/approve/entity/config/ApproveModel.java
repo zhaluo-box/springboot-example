@@ -1,5 +1,6 @@
-package com.example.boot.approve.entity;
+package com.example.boot.approve.entity.config;
 
+import com.example.boot.approve.entity.common.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -39,10 +40,10 @@ public class ApproveModel extends BaseEntity {
     private int version;
 
     /**
-     * 默认禁用
+     * 默认禁用状态
      * 启用禁用 true : 禁用，false : 启用
      */
-    private boolean disabled = true;
+    private boolean disabled;
 
     /**
      * 审批模板基础路径 【结合实例中的参数Id，以及下面的详情Id（detailId）
@@ -55,8 +56,9 @@ public class ApproveModel extends BaseEntity {
      */
     private String detailId;
 
-    //    /**
-    //     * 服务ID 【保留字段,微服务的时候用来与模板名称确定唯一，也是微服务的一个标识】
-    //     */
-    //    private String serviceId;
+    /**
+     * 服务ID 【保留字段,微服务的时候用来与模板名称确定唯一，也是微服务的一个标识】
+     * 取值： spring.application.name
+     */
+    private String serviceName;
 }

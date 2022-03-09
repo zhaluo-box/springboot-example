@@ -8,11 +8,12 @@ package com.example.boot.approve.enums;
 public enum ApproveResult {
 
     IN_APPROVED, // 审批中
-    APPROVED, // 已审批的
+    APPROVED, // 审批通过
     REJECTED, // 拒绝的
-    CANCELED,  // 取消的
+    CANCELED,  // 审批撤销
     TRANSFER, // 转办的
     REFUSE, // 拒绝的
+    INVALID, //作废【整个流程审批通过之后才会出现作废按钮， 逻辑归档】
     PENDING_APPROVED; // 待审批的
 
 }

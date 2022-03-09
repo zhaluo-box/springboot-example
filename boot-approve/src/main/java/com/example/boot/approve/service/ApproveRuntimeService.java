@@ -1,11 +1,12 @@
 package com.example.boot.approve.service;
 
 /**
+ * 审批流程运行接口
  * Created  on 2022/3/8 20:20:47
  *
  * @author zl
  */
-public interface ApproveService {
+public interface ApproveRuntimeService {
 
     /**
      * 审批
@@ -38,9 +39,8 @@ public interface ApproveService {
      * @param instanceId 实例Id
      * @param remark     备注消息
      * @param level      驳回节点
-     * @param assignee   指定人
      */
-    void reject(long instanceId, String remark, int level, long assignee);
+    void reject(long instanceId, String remark, long level);
 
     /**
      * 转办

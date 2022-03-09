@@ -1,6 +1,7 @@
-package com.example.boot.approve.entity;
+package com.example.boot.approve.entity.common;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
@@ -9,7 +10,8 @@ import java.util.Date;
  *
  * @author zl
  */
-@Data
+@Setter
+@Getter
 public class BaseEntity {
 
     private long createBy;
