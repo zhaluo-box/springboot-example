@@ -4,6 +4,7 @@ import com.example.boot.approve.entity.config.ApproveAssigneeConfig;
 import com.example.boot.approve.entity.config.ApproveModel;
 import com.example.boot.approve.entity.config.ApproveNodeConfig;
 import com.example.boot.approve.service.ApproveConfigManager;
+import com.example.boot.approve.validator.ApproveConfigValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,9 @@ public class ApproveConfigController {
     @Autowired
     private ApproveConfigManager approveConfigManager;
 
+    @Autowired
+    private ApproveConfigValidator approveConfigValidator;
+
     //    ==========================审批模板配置================================
 
     /**
@@ -32,8 +36,17 @@ public class ApproveConfigController {
      * TODO 查询条件待定
      */
     @GetMapping("models/")
-    public ResponseEntity<List<ApproveModel>> listModel() {
-        return ResponseEntity.ok(null);
+    public ResponseEntity<List<ApproveModel>> listModel(@RequestParam(required = false) String modelName, @RequestParam(required = false) String serviceName) {
+        return ResponseEntity.ok(approveConfigManager.listModel(modelName, serviceName));
+    }
+
+    /**
+     * TODO: 2022/3/10  只是用于测试
+     */
+    @PostMapping("models/")
+    public ResponseEntity<Void> saveModel(@RequestBody ApproveModel model) {
+        approveConfigManager.saveModel(model);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
@@ -44,6 +57,7 @@ public class ApproveConfigController {
      */
     @PutMapping("models/")
     public ResponseEntity<Void> updateModel(@RequestBody ApproveModel model) {
+
         approveConfigManager.updateModel(model);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -72,7 +86,7 @@ public class ApproveConfigController {
      * 展示所有节点
      */
     @GetMapping("nodes/{modelId}/")
-    public ResponseEntity<List<ApproveNodeConfig>> listNodeConfig(@PathVariable String modelId) {
+    public ResponseEntity<List<ApproveNodeConfig>> listNodeConfig(@PathVariable long modelId) {
         return ResponseEntity.ok(approveConfigManager.listNodeConfig(modelId));
     }
 
@@ -80,7 +94,7 @@ public class ApproveConfigController {
      * 添加节点
      */
     @PostMapping("nodes/")
-    public ResponseEntity<Void> saveNode(@RequestBody ApproveNodeConfig nodeConfig) {
+    public ResponseEntity<Void> saveNode(@RequestBody ApproveNodeConfig nodeConfig) throws Exception {
         approveConfigManager.saveNode(nodeConfig);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -118,6 +132,8 @@ public class ApproveConfigController {
      */
     @PostMapping("assignees/")
     public ResponseEntity<Void> saveAssignee(@RequestBody ApproveAssigneeConfig assigneeConfig) {
+        // TODO 校验基础信息是否足够，是否符合要求
+        approveConfigValidator.verifyAssigneeIsRequired(assigneeConfig);
         approveConfigManager.saveAssignee(assigneeConfig);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -126,7 +142,7 @@ public class ApproveConfigController {
      * 删除审批人配置
      */
     @DeleteMapping("assignees/{assigneeId}/")
-    public ResponseEntity<Void> deleteAssignee(@PathVariable String assigneeId) {
+    public ResponseEntity<Void> deleteAssignee(@PathVariable long assigneeId) {
         approveConfigManager.deleteAssignee(assigneeId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -146,7 +162,7 @@ public class ApproveConfigController {
      * 审批配置预览
      */
     @GetMapping("models/{modelId}/actions/preview/")
-    public ResponseEntity<?> preview(@PathVariable String modelId) {
+    public ResponseEntity<?> preview(@PathVariable long modelId) {
         // TODO 返回值类型待定
         approveConfigManager.preview(modelId);
         return ResponseEntity.ok(null);

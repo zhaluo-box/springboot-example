@@ -1,5 +1,9 @@
 package com.example.boot.approve.entity.config;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.boot.approve.entity.common.BaseApproveNode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -16,21 +20,23 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@TableName(value = "approve_node_config")
 public class ApproveNodeConfig extends BaseApproveNode {
+
+    public interface ColumnConstant {
+        String APPROVE_MODEL_ID = "approve_model_id";
+    }
 
     /**
      * 配置ID
      */
-    private long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
     /**
      * 审批模板Id
      */
+    @TableField(value = ColumnConstant.APPROVE_MODEL_ID)
     private long approveModelId;
-
-    /**
-     * 审批模板版本号
-     */
-    private int approveModelVersion;
 
 }

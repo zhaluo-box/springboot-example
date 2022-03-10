@@ -14,27 +14,35 @@ import java.util.List;
  */
 public interface ApproveConfigManager {
 
+    List<ApproveModel> listModel(String modelName, String serviceName);
+
+    void saveModel(ApproveModel model);
+
     void updateModel(ApproveModel model);
 
     void copyModel(String modelId);
 
     void publishModel(String modelId);
 
-    List<ApproveNodeConfig> listNodeConfig(String modelId);
+    List<ApproveNodeConfig> listNodeConfig(long modelId);
 
-    void saveNode(ApproveNodeConfig nodeConfig);
+    void saveNode(ApproveNodeConfig nodeConfig) throws Exception;
 
     void updateNode(ApproveNodeConfig nodeConfig);
 
+    /**
+     * 删除节点配置， 节点自身的序号不变
+     */
     void deleteNode(String nodeId);
 
     List<ApproveAssigneeConfig> listAssignee(String nodeId);
 
     void saveAssignee(ApproveAssigneeConfig assigneeConfig);
 
-    void deleteAssignee(String assigneeId);
+    void deleteAssignee(long assigneeId);
 
     void updateAssignee(ApproveAssigneeConfig assigneeConfig);
 
-    void preview(String modelId);
+    void preview(long modelId);
+
 }

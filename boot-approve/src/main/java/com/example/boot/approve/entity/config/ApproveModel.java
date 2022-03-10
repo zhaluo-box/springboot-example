@@ -1,6 +1,8 @@
 package com.example.boot.approve.entity.config;
 
-import com.example.boot.approve.entity.common.BaseEntity;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,17 +17,20 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(of = "id")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ApproveModel extends BaseEntity {
+@TableName(value = "approve_model")
+public class ApproveModel {
 
     /**
      * ID
      */
-    private long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
     /**
      * 模板名称【模板名称最初由代码自己生成出来维护到数据库】
+     * 不允许修改， 只能服务自动发现
      */
     private String name;
 
@@ -36,6 +41,7 @@ public class ApproveModel extends BaseEntity {
 
     /**
      * 版本号【版本号不断递增，但是数据永远只有一条】
+     * 自动新增版本号
      */
     private int version;
 
@@ -61,4 +67,8 @@ public class ApproveModel extends BaseEntity {
      * 取值： spring.application.name
      */
     private String serviceName;
+
+    // TODO: 2022/3/10  对审批模板进行管理 分为草稿【disabled = true】， 正式版【disabled =false】 ： 历史版本【disabled = true】 发布功能会影响这些状态， 必须有一版本为正式版，否则程序无法正常运行
+
+    // TODO: 2022/3/10  记录支持的功能按钮，审批 拒绝 驳回 转办 撤销 作废 等 
 }

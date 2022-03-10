@@ -1,5 +1,9 @@
 package com.example.boot.approve.entity.config;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,11 +19,18 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @EqualsAndHashCode(of = "id")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@TableName(value = "approve_assignee_config")
 public class ApproveAssigneeConfig {
+
+    public interface ColumnConstant {
+        String APPROVE_NODE_ID = "approve_node_id";
+        String SUPPORT_TRANSFER = "support_transfer";
+    }
 
     /**
      * 主键Id
      */
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -30,6 +41,7 @@ public class ApproveAssigneeConfig {
     /**
      * 审批配置节点Id
      */
+    @TableField(value = "approve_node_id")
     private long approveNodeId;
 
     /**
@@ -45,12 +57,13 @@ public class ApproveAssigneeConfig {
     /**
      * 是否支持转办，默认不支持
      */
+    @TableField(value = "support_transfer")
     private boolean supportTransfer;
 
     /**
-     * 转办人员Id【以数组的形式存放，用逗号 “，”分割】
+     * 转办人员Id 目前只支持一个
      */
-    private String transferCandidates;
+    private long transfer;
 
     /**
      * 是否是发起人 【默认不支持转办】

@@ -1,7 +1,9 @@
 package com.example.boot.approve.entity.common;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.ibatis.type.EnumTypeHandler;
 
 /**
  * Created  on 2022/3/9 10:10:04
@@ -24,6 +26,7 @@ public class BaseApproveNode {
     /**
      * 审批类型
      */
+    @TableField(typeHandler = EnumTypeHandler.class)
     private ApproveType type;
 
     /**
@@ -39,5 +42,5 @@ public class BaseApproveNode {
     /**
      * 审批等级【数据库允许重复， 并不一定是挨着的】
      */
-    private int leave;
+    private int level;
 }
