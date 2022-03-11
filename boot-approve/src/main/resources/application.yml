@@ -7,3 +7,16 @@ spring:
     url: jdbc:mysql://192.168.13.10:3306/boot-approve?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
     username: root
     password: root
+mybatis-plus:
+  type-aliases-package: com.example.boot.approve.mapper
+  #  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true #驼峰自动映射
+    lazy-loading-enabled: true
+    multiple-result-sets-enabled: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 日志控制级别
+  global-config:
+    banner: false
+    db-config:
+      id-type: AUTO
+      table-underline: true

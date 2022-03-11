@@ -1,7 +1,6 @@
 package com.example.boot.approve.entity.config;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.boot.approve.entity.common.BaseApproveNode;
@@ -23,10 +22,6 @@ import lombok.experimental.Accessors;
 @TableName(value = "approve_node_config")
 public class ApproveNodeConfig extends BaseApproveNode {
 
-    public interface ColumnConstant {
-        String APPROVE_MODEL_ID = "approve_model_id";
-    }
-
     /**
      * 配置ID
      */
@@ -36,7 +31,6 @@ public class ApproveNodeConfig extends BaseApproveNode {
     /**
      * 审批模板Id
      */
-    @TableField(value = ColumnConstant.APPROVE_MODEL_ID)
     private long approveModelId;
 
 }

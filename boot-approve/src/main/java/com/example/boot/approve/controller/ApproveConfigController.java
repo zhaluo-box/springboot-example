@@ -1,5 +1,7 @@
 package com.example.boot.approve.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.example.boot.approve.common.mvc.BasePageQuery;
 import com.example.boot.approve.entity.config.ApproveAssigneeConfig;
 import com.example.boot.approve.entity.config.ApproveModel;
 import com.example.boot.approve.entity.config.ApproveNodeConfig;
@@ -33,11 +35,19 @@ public class ApproveConfigController {
 
     /**
      * 查询所有审批模板不分页
-     * TODO 查询条件待定
      */
     @GetMapping("models/")
     public ResponseEntity<List<ApproveModel>> listModel(@RequestParam(required = false) String modelName, @RequestParam(required = false) String serviceName) {
         return ResponseEntity.ok(approveConfigManager.listModel(modelName, serviceName));
+    }
+
+    /**
+     * 分页返回
+     */
+    @GetMapping("models/actions/pages/")
+    public ResponseEntity<IPage<ApproveModel>> pageModel(@RequestParam(required = false) String modelName, @RequestParam(required = false) String serviceName,
+                                                         BasePageQuery<String, ApproveModel> pageQuery) {
+        return ResponseEntity.ok(approveConfigManager.pageModel(modelName, serviceName, pageQuery));
     }
 
     /**
@@ -51,6 +61,7 @@ public class ApproveConfigController {
 
     /**
      * 修改审批模板 【审批模板不允许新增，只能修改】
+     * 目前哪些可以编辑哪些不可以编辑由前端控制，目前服务ID和名称是不允许修改的
      *
      * @param model 审批模板
      * @return httpHeader 204 no-content
@@ -66,7 +77,7 @@ public class ApproveConfigController {
      * 复制   复制审批模板的所有相关数据【节点配置，指定人配置】
      */
     @PostMapping("models/{modelId}/actions/copy-models/")
-    public ResponseEntity<Void> copyModel(@PathVariable String modelId) {
+    public ResponseEntity<Void> copyModel(@PathVariable long modelId) {
         approveConfigManager.copyModel(modelId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -75,10 +86,12 @@ public class ApproveConfigController {
      * 发布
      */
     @PostMapping("models/{modelId}/actions/publish-models/")
-    public ResponseEntity<Void> publishModel(@PathVariable String modelId) {
+    public ResponseEntity<Void> publishModel(@PathVariable long modelId) {
         approveConfigManager.publishModel(modelId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    // 审批模板不支持删除
 
     //    ==========================审批节点配置================================
 
@@ -112,7 +125,7 @@ public class ApproveConfigController {
      * 删除节点
      */
     @DeleteMapping("nodes/{nodeId}/")
-    public ResponseEntity<Void> deleteNode(@PathVariable String nodeId) {
+    public ResponseEntity<Void> deleteNode(@PathVariable long nodeId) {
         approveConfigManager.deleteNode(nodeId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -123,7 +136,7 @@ public class ApproveConfigController {
      * 展示当前节点的所有审批人
      */
     @GetMapping("assignees/{nodeId}/")
-    public ResponseEntity<List<ApproveAssigneeConfig>> listAssignee(@PathVariable String nodeId) {
+    public ResponseEntity<List<ApproveAssigneeConfig>> listAssignee(@PathVariable long nodeId) {
         return ResponseEntity.ok(approveConfigManager.listAssignee(nodeId));
     }
 

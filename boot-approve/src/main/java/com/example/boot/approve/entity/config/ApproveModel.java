@@ -68,6 +68,20 @@ public class ApproveModel {
      */
     private String serviceName;
 
+    /**
+     * 默认为草稿版
+     */
+    private ApproveModelStatus status = ApproveModelStatus.DRAFT;
+
+    /**
+     * 审批模板状态
+     */
+    public enum ApproveModelStatus {
+        HISTORY,// 历史版
+        DRAFT,// 草稿
+        OFFICIAL_EDITION // 官方版，这里指代正式版【启用的版本】
+    }
+
     // TODO: 2022/3/10  对审批模板进行管理 分为草稿【disabled = true】， 正式版【disabled =false】 ： 历史版本【disabled = true】 发布功能会影响这些状态， 必须有一版本为正式版，否则程序无法正常运行
     // 复制的时候所有配置为草稿状态 还需要添加审批移交 方便审批人员职位变动进行工作交接
     // TODO: 2022/3/10  记录支持的功能按钮，审批 拒绝 驳回 转办 撤销 作废 等 
