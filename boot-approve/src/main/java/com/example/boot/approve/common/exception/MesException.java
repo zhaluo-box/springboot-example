@@ -5,17 +5,17 @@ package com.example.boot.approve.common.exception;
  *
  * @author zl
  */
-public class MESException extends RuntimeException {
+public class MesException extends RuntimeException {
 
-    public MESException(String message) {
+    public MesException(String message) {
         super(message);
     }
 
-    public MESException(String message, Throwable t) {
+    public MesException(String message, Throwable t) {
         super(message, t);
     }
 
-    public MESException(Throwable t) {
+    public MesException(Throwable t) {
         super(t);
     }
 

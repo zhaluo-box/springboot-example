@@ -36,9 +36,9 @@ public class DefaultMvcExceptionHandler {
     }
 
     @ResponseBody
-    @ExceptionHandler(MESException.class)
+    @ExceptionHandler(MesException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> handle(MESException exception) {
+    public ResponseEntity<String> handle(MesException exception) {
         log.warn(exception.getMessage(), exception);
         return buildResultMap(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
     }

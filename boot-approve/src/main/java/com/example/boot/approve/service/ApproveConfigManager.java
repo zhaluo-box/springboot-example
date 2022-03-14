@@ -2,6 +2,7 @@ package com.example.boot.approve.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.boot.approve.common.mvc.BasePageQuery;
+import com.example.boot.approve.controller.dto.ApproveModelConfigPreviewDTO;
 import com.example.boot.approve.entity.config.ApproveAssigneeConfig;
 import com.example.boot.approve.entity.config.ApproveModel;
 import com.example.boot.approve.entity.config.ApproveNodeConfig;
@@ -47,6 +48,13 @@ public interface ApproveConfigManager {
 
     void updateAssignee(ApproveAssigneeConfig assigneeConfig);
 
-    void preview(long modelId);
+    /**
+     * 审批预览
+     *
+     * @param modelId 审批模板ID
+     * @return 预览DTO
+     */
+    ApproveModelConfigPreviewDTO preview(long modelId);
 
+    ApproveModel findOfficialEditionModel(String modelName);
 }

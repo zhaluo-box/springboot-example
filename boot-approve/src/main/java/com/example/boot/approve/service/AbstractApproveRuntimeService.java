@@ -7,14 +7,7 @@ package com.example.boot.approve.service;
  */
 public abstract class AbstractApproveRuntimeService implements ApproveRuntimeService {
 
-    protected ApproveRuntimeService approveRuntimeService;
-
-    /**
-     * 子类实现赋予父类
-     *
-     * @param approveRuntimeService 审批运行时服务
-     */
-    protected abstract void setApproveRuntimeService(ApproveRuntimeService approveRuntimeService);
+    protected abstract ApproveRuntimeService getApproveRuntimeService();
 
     protected void approvePre(long instanceId, String remark) {
     }
@@ -25,7 +18,7 @@ public abstract class AbstractApproveRuntimeService implements ApproveRuntimeSer
     @Override
     public void approve(long instanceId, String remark) {
         approvePre(instanceId, remark);
-        approveRuntimeService.approve(instanceId, remark);
+        getApproveRuntimeService().approve(instanceId, remark);
         approvePost(instanceId, remark);
     }
 
@@ -39,7 +32,7 @@ public abstract class AbstractApproveRuntimeService implements ApproveRuntimeSer
     @Override
     public void refuse(long instanceId, String remark) {
         refusePre(instanceId, remark);
-        approveRuntimeService.refuse(instanceId, remark);
+        getApproveRuntimeService().refuse(instanceId, remark);
         refusePost(instanceId, remark);
     }
 
@@ -54,7 +47,7 @@ public abstract class AbstractApproveRuntimeService implements ApproveRuntimeSer
     @Override
     public void cancel(long instanceId, String remark) {
         cancelPre(instanceId, remark);
-        approveRuntimeService.cancel(instanceId, remark);
+        getApproveRuntimeService().cancel(instanceId, remark);
         cancelPost(instanceId, remark);
     }
 
@@ -68,7 +61,7 @@ public abstract class AbstractApproveRuntimeService implements ApproveRuntimeSer
     @Override
     public void reject(long instanceId, String remark, long nodeId) {
         rejectPre(instanceId, remark, nodeId);
-        approveRuntimeService.reject(instanceId, remark, nodeId);
+        getApproveRuntimeService().reject(instanceId, remark, nodeId);
         rejectPost(instanceId, remark, nodeId);
     }
 
@@ -83,7 +76,7 @@ public abstract class AbstractApproveRuntimeService implements ApproveRuntimeSer
     @Override
     public void transform(long instanceId, String remark, long transfer) {
         transformPre(instanceId, remark, transfer);
-        approveRuntimeService.transform(instanceId, remark, transfer);
+        getApproveRuntimeService().transform(instanceId, remark, transfer);
         transformPost(instanceId, remark, transfer);
     }
 }

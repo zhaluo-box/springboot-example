@@ -5,7 +5,7 @@ package com.example.boot.approve.common.exception;
  *
  * @author zl
  */
-public class MethodNotAllowedException extends MESException {
+public class MethodNotAllowedException extends MesException {
 
     public MethodNotAllowedException(String message) {
         super(message);

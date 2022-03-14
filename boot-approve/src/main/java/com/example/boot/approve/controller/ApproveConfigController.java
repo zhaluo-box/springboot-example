@@ -2,6 +2,7 @@ package com.example.boot.approve.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.boot.approve.common.mvc.BasePageQuery;
+import com.example.boot.approve.controller.dto.ApproveModelConfigPreviewDTO;
 import com.example.boot.approve.entity.config.ApproveAssigneeConfig;
 import com.example.boot.approve.entity.config.ApproveModel;
 import com.example.boot.approve.entity.config.ApproveNodeConfig;
@@ -34,6 +35,7 @@ public class ApproveConfigController {
     //    ==========================审批模板配置================================
 
     /**
+     * TODO: 2022/3/14  冗余接口后期删除
      * 查询所有审批模板不分页
      */
     @GetMapping("models/")
@@ -43,6 +45,9 @@ public class ApproveConfigController {
 
     /**
      * 分页返回
+     *
+     * @param modelName   模板名称
+     * @param serviceName 服务名称 application.name
      */
     @GetMapping("models/actions/pages/")
     public ResponseEntity<IPage<ApproveModel>> pageModel(@RequestParam(required = false) String modelName, @RequestParam(required = false) String serviceName,
@@ -68,7 +73,7 @@ public class ApproveConfigController {
      */
     @PutMapping("models/")
     public ResponseEntity<Void> updateModel(@RequestBody ApproveModel model) {
-
+        approveConfigValidator.verifyApproveModelIsValid(model);
         approveConfigManager.updateModel(model);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -87,6 +92,7 @@ public class ApproveConfigController {
      */
     @PostMapping("models/{modelId}/actions/publish-models/")
     public ResponseEntity<Void> publishModel(@PathVariable long modelId) {
+        approveConfigValidator.verifyModelAssigneeIsValid(modelId);
         approveConfigManager.publishModel(modelId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -108,6 +114,7 @@ public class ApproveConfigController {
      */
     @PostMapping("nodes/")
     public ResponseEntity<Void> saveNode(@RequestBody ApproveNodeConfig nodeConfig) throws Exception {
+        approveConfigValidator.verifyNodeConfigNameIsValid(nodeConfig);
         approveConfigManager.saveNode(nodeConfig);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -117,12 +124,14 @@ public class ApproveConfigController {
      */
     @PutMapping("nodes/")
     public ResponseEntity<Void> updateNode(@RequestBody ApproveNodeConfig nodeConfig) {
+        approveConfigValidator.verifyNodeConfigIsValidForUpdate(nodeConfig);
         approveConfigManager.updateNode(nodeConfig);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**
      * 删除节点
+     * 节点删除不做任何限制，因为有前置条件，审批模板相关的所有东西，都需要在草稿状态下才能修改【需要前端做一定的限制】
      */
     @DeleteMapping("nodes/{nodeId}/")
     public ResponseEntity<Void> deleteNode(@PathVariable long nodeId) {
@@ -145,8 +154,7 @@ public class ApproveConfigController {
      */
     @PostMapping("assignees/")
     public ResponseEntity<Void> saveAssignee(@RequestBody ApproveAssigneeConfig assigneeConfig) {
-        // TODO 校验基础信息是否足够，是否符合要求
-        approveConfigValidator.verifyAssigneeIsRequired(assigneeConfig);
+        approveConfigValidator.verifyAssigneeIsValid(assigneeConfig);
         approveConfigManager.saveAssignee(assigneeConfig);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -175,10 +183,8 @@ public class ApproveConfigController {
      * 审批配置预览
      */
     @GetMapping("models/{modelId}/actions/preview/")
-    public ResponseEntity<?> preview(@PathVariable long modelId) {
-        // TODO 返回值类型待定
-        approveConfigManager.preview(modelId);
-        return ResponseEntity.ok(null);
+    public ResponseEntity<ApproveModelConfigPreviewDTO> preview(@PathVariable long modelId) {
+        return ResponseEntity.ok(approveConfigManager.preview(modelId));
     }
 
 }

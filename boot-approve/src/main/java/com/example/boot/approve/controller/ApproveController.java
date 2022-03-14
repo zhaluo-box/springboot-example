@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -25,7 +26,7 @@ public class ApproveController {
      * 审批
      */
     @PostMapping("actions/approve/")
-    public ResponseEntity<Void> approve(long instanceId, String remark) {
+    public ResponseEntity<Void> approve(@RequestParam long instanceId, @RequestParam String remark) {
         approveRuntimeService.approve(instanceId, remark);
         return ResponseEntity.ok().build();
     }
@@ -37,7 +38,7 @@ public class ApproveController {
      * @param remark     备注消息
      */
     @PostMapping("actions/refuse/")
-    public ResponseEntity<Void> refuse(long instanceId, String remark) {
+    public ResponseEntity<Void> refuse(@RequestParam long instanceId, @RequestParam String remark) {
         approveRuntimeService.refuse(instanceId, remark);
         return ResponseEntity.ok().build();
     }
@@ -49,7 +50,7 @@ public class ApproveController {
      * @param remark     备注消息
      */
     @PostMapping("actions/cancel/")
-    public ResponseEntity<Void> cancel(long instanceId, String remark) {
+    public ResponseEntity<Void> cancel(@RequestParam long instanceId, @RequestParam String remark) {
         approveRuntimeService.cancel(instanceId, remark);
         return ResponseEntity.ok().build();
     }
@@ -63,7 +64,7 @@ public class ApproveController {
      * @param nodeId     驳回节点
      */
     @PostMapping("actions/reject/")
-    public ResponseEntity<Void> reject(long instanceId, String remark, long nodeId) {
+    public ResponseEntity<Void> reject(@RequestParam long instanceId, @RequestParam String remark, @RequestParam long nodeId) {
         approveRuntimeService.reject(instanceId, remark, nodeId);
         return ResponseEntity.ok().build();
     }
@@ -81,5 +82,9 @@ public class ApproveController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * TODO 工作移交 由超级管理员 才能进行管理
+     */
+    
 }
 

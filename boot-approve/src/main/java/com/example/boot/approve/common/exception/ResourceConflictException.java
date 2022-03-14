@@ -5,7 +5,7 @@ package com.example.boot.approve.common.exception;
  *
  * @author zl
  */
-public class ResourceConflictException extends MESException {
+public class ResourceConflictException extends MesException {
     public ResourceConflictException(String message) {
         super(message);
     }

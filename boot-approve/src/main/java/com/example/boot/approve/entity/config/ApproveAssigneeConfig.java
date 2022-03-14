@@ -1,12 +1,17 @@
 package com.example.boot.approve.entity.config;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.example.boot.approve.common.mybaitsplus.ListToStringTypeHandler;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 审批人配置
@@ -18,7 +23,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @EqualsAndHashCode(of = "id")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@TableName(value = "approve_assignee_config")
+@TableName(value = "approve_assignee_config", autoResultMap = true)
 public class ApproveAssigneeConfig {
 
     /**
@@ -55,7 +60,8 @@ public class ApproveAssigneeConfig {
     /**
      * 转办人员Id 目前只支持一个
      */
-    private long transfer;
+    @TableField(value = "transfer_candidates", typeHandler = ListToStringTypeHandler.class)
+    private List<Long> transferCandidates = new ArrayList<>();
 
     /**
      * 是否是发起人 【默认不支持转办】

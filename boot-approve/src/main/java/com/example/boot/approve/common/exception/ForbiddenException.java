@@ -5,7 +5,7 @@ package com.example.boot.approve.common.exception;
  *
  * @author zl
  */
-public class ForbiddenException extends MESException {
+public class ForbiddenException extends MesException {
     public ForbiddenException(String message) {
         super(message);
     }

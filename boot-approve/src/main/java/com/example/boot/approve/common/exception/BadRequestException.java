@@ -5,7 +5,7 @@ package com.example.boot.approve.common.exception;
  *
  * @author zl
  */
-public class BadRequestException extends MESException {
+public class BadRequestException extends MesException {
     public BadRequestException(String message) {
         super(message);
     }

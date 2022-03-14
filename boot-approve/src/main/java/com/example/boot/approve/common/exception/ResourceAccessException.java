@@ -5,7 +5,7 @@ package com.example.boot.approve.common.exception;
  *
  * @author zl
  */
-public class ResourceAccessException extends MESException {
+public class ResourceAccessException extends MesException {
     public ResourceAccessException(String message) {
         super(message);
     }

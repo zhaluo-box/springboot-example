@@ -5,7 +5,7 @@ package com.example.boot.approve.common.exception;
  *
  * @author zl
  */
-public class ResourceNotFoundException extends MESException {
+public class ResourceNotFoundException extends MesException {
 
     public ResourceNotFoundException(String message) {
         super(message);

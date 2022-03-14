@@ -14,6 +14,11 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
 
     @Override
     public void approve(long instanceId, String remark) {
+        // 直签
+        
+        // 异或
+
+        // 会签
 
     }
 

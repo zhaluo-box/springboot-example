@@ -3,9 +3,11 @@ package com.example.boot.approve.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.example.boot.approve.common.exception.ResourceConflictException;
 import com.example.boot.approve.common.exception.ResourceNotFoundException;
 import com.example.boot.approve.common.mvc.BasePageQuery;
+import com.example.boot.approve.controller.dto.ApproveAssigneeConfigDTO;
+import com.example.boot.approve.controller.dto.ApproveModelConfigPreviewDTO;
+import com.example.boot.approve.controller.dto.ApproveNodeConfigDTO;
 import com.example.boot.approve.entity.common.BaseApproveNode;
 import com.example.boot.approve.entity.config.ApproveAssigneeConfig;
 import com.example.boot.approve.entity.config.ApproveModel;
@@ -14,12 +16,15 @@ import com.example.boot.approve.mapper.ApproveAssigneeConfigMapper;
 import com.example.boot.approve.mapper.ApproveModelMapper;
 import com.example.boot.approve.mapper.ApproveNodeConfigMapper;
 import com.example.boot.approve.service.ApproveConfigManager;
-import org.mybatis.spring.SqlSessionTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +34,7 @@ import java.util.stream.Collectors;
  *
  * @author zl
  */
+@Slf4j
 @Service
 public class DefaultApproveConfigManager implements ApproveConfigManager {
 
@@ -75,33 +81,47 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
         approveModelMapper.updateById(model);
     }
 
-    @Autowired
-    private SqlSessionTemplate sqlSessionBatchTemplate;
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void copyModel(long modelId) {
 
         // 模板复制
         ApproveModel approveModel = approveModelMapper.selectById(modelId);
-        List<ApproveNodeConfig> approveNodeConfigs = listNodeConfig(modelId);
+        List<ApproveNodeConfig> oldNodeConfigs = listNodeConfig(modelId);
+        List<ApproveNodeConfig> oldNodeConfigSnapshot = copyListBean(oldNodeConfigs); // 节点信息快照
+
         LambdaQueryWrapper<ApproveAssigneeConfig> query = new QueryWrapper<ApproveAssigneeConfig>().lambda()
                                                                                                    .in(ApproveAssigneeConfig::getApproveNodeId,
-                                                                                                       approveNodeConfigs.stream()
-                                                                                                                         .map(ApproveNodeConfig::getId)
-                                                                                                                         .collect(Collectors.toUnmodifiableList()));
-        List<ApproveAssigneeConfig> assigneeConfigList = approveAssigneeConfigMapper.selectList(query);
+                                                                                                       oldNodeConfigs.stream()
+                                                                                                                     .map(ApproveNodeConfig::getId)
+                                                                                                                     .collect(Collectors.toUnmodifiableList()));
+        List<ApproveAssigneeConfig> oldAssigneeConfigList = approveAssigneeConfigMapper.selectList(query);
 
         // 版本号自动+1 存为草稿
         int x = approveModelMapper.selectMaxVersionByModelId(modelId);
         approveModel.setVersion(x + 1).setDisabled(true).setStatus(ApproveModel.ApproveModelStatus.DRAFT).setId(null);
-
-        approveNodeConfigs.forEach(approveNodeConfig -> approveNodeConfig.setId(null));
-        assigneeConfigList.forEach(assigneeConfig -> assigneeConfig.setId(null));
-
         saveModel(approveModel);
-        approveNodeConfigs.forEach(approveNodeConfigMapper::insert);
-        assigneeConfigList.forEach(approveAssigneeConfigMapper::insert);
+
+        // 节点信息复制 通过版本号，名称，应用名称 查出最新复制的审批模板
+        ApproveModel newModel = approveModelMapper.selectOne(new QueryWrapper<ApproveModel>().lambda()
+                                                                                             .eq(ApproveModel::getVersion, x + 1)
+                                                                                             .eq(ApproveModel::getName, approveModel.getName())
+                                                                                             .eq(ApproveModel::getServiceName, approveModel.getServiceName()));
+
+        oldNodeConfigs.stream()
+                      .peek(nodeConfig -> nodeConfig.setApproveModelId(newModel.getId()))
+                      .peek(approveNodeConfig -> approveNodeConfig.setId(null))
+                      .forEach(approveNodeConfigMapper::insert);
+
+        //审批人信息复制
+        List<ApproveNodeConfig> newNodeConfigs = approveNodeConfigMapper.selectList(
+                        new QueryWrapper<ApproveNodeConfig>().lambda().eq(ApproveNodeConfig::getApproveModelId, newModel.getId()));
+
+        oldAssigneeConfigList.stream().peek(oldAssigneeConfig -> oldAssigneeConfig.setId(null)).peek(oldAssigneeConfig -> {
+            long oldNodeId = oldAssigneeConfig.getApproveNodeId();
+            Long newNodeId = findNewApproveNodeConfigId(oldNodeId, oldNodeConfigSnapshot, newNodeConfigs);
+            oldAssigneeConfig.setApproveNodeId(newNodeId);
+        }).forEach(approveAssigneeConfigMapper::insert);
 
     }
 
@@ -110,8 +130,6 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
     public void publishModel(long modelId) {
 
         ApproveModel approveModel = approveModelMapper.selectById(modelId);
-
-        checkAssignee(modelId);
 
         // 其他版本全部禁用
         ApproveModel model = new ApproveModel().setDisabled(true);
@@ -141,54 +159,14 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void saveNode(ApproveNodeConfig nodeConfig) throws Exception {
+    public void saveNode(ApproveNodeConfig nodeConfig) {
         approveNodeConfigMapper.insert(nodeConfig);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateNode(ApproveNodeConfig nodeConfig) {
-
-        ApproveNodeConfig oldApproveNodeConfig = approveNodeConfigMapper.selectById(nodeConfig.getId());
-
-        // 节点类型没有发生变化
-        if (oldApproveNodeConfig.getType().equals(nodeConfig.getType())) {
-            approveNodeConfigMapper.updateById(nodeConfig);
-            return;
-        }
-        // TODO 节点类型发生变化
-
-        // 查询以前的节点类型 以前是直签 转为异或 会签不发生任何变化
-        boolean direct = BaseApproveNode.ApproveType.DIRECT.equals(oldApproveNodeConfig.getType());
-        // 如果异或转会签 也不发生变化
-        boolean xofToCountersign = BaseApproveNode.ApproveType.XOF.equals(oldApproveNodeConfig.getType()) && BaseApproveNode.ApproveType.COUNTERSIGN.equals(
-                        nodeConfig.getType());
-
-        if (direct || xofToCountersign) {
-            approveNodeConfigMapper.updateById(nodeConfig);
-            return;
-        }
-
-        // 会签转异或 审批人数量大于2 只保留两个，删除最后一个
-        boolean countersignToXof =
-                        BaseApproveNode.ApproveType.COUNTERSIGN.equals(oldApproveNodeConfig.getType()) && BaseApproveNode.ApproveType.COUNTERSIGN.equals(
-                                        nodeConfig.getType());
-
-        if (countersignToXof && listAssignee(nodeConfig.getId()).size() > 2) {
-            throw new ResourceConflictException(nodeConfig.getName() + "节点 审批类型从会签转为异或, 审批人不能多于2个， 请选择保留最多2位审批人, 删除其他审批人 ");
-        }
-
-        // 会签转直签
-        boolean countersignToDirect =
-                        BaseApproveNode.ApproveType.COUNTERSIGN.equals(oldApproveNodeConfig.getType()) && BaseApproveNode.ApproveType.DIRECT.equals(
-                                        nodeConfig.getType());
-
-        if (countersignToDirect && listAssignee(nodeConfig.getId()).size() > 1) {
-            throw new ResourceConflictException(nodeConfig.getName() + "节点 审批类型从会签转为直签, 审批人不能多于2个， 请选择保留最多2位审批人, 删除其他审批人 ");
-        }
-
         approveNodeConfigMapper.updateById(nodeConfig);
-
     }
 
     /**
@@ -198,7 +176,7 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
     @Transactional(rollbackFor = Exception.class)
     public void deleteNode(long nodeId) {
 
-        // TODO 检查当前审批模板是否只有一级节点 如果已有一级节点 不允许删除，至少需要一级审批人
+        // TODO 检查当前审批模板是否只有一级节点 如果只剩下一级节点 不允许删除，至少需要一级审批人
 
         approveNodeConfigMapper.deleteById(nodeId);
         //删除关联审批人
@@ -234,21 +212,77 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
     }
 
     @Override
-    public void preview(long modelId) {
-        // TODO 预览返回值待定
+    public ApproveModelConfigPreviewDTO preview(long modelId) {
+
+        ApproveModel approveModel = approveModelMapper.selectById(modelId);
+        // 获取审批节点相关信息
+        List<ApproveNodeConfig> approveNodeConfigs = listNodeConfig(modelId);
+
+        // 审批节点信息转换
+        List<ApproveNodeConfigDTO> nodes = approveNodeConfigs.stream().map(node -> {
+            ApproveNodeConfigDTO configDTO = new ApproveNodeConfigDTO();
+            BeanUtils.copyProperties(node, configDTO);
+            List<ApproveAssigneeConfig> approveAssigneeConfigs = listAssignee(node.getId());
+            List<ApproveAssigneeConfigDTO> assigneeConfigDTOList = assigneeTransform(approveAssigneeConfigs);
+            configDTO.setApproveAssigneeConfigs(assigneeConfigDTOList);
+            return configDTO;
+        }).sorted(Comparator.comparing(BaseApproveNode::getLevel)).collect(Collectors.toList());
+
+        ApproveModelConfigPreviewDTO previewDTO = new ApproveModelConfigPreviewDTO();
+        BeanUtils.copyProperties(approveModel, previewDTO);
+        previewDTO.setApproveNodeConfigs(nodes);
+
+        return previewDTO;
     }
 
     /**
-     * TODO 将检查逻辑 放到validator 业务模块 将检查与事务分离
-     * 检查审批节点下的审批人员， 所有审批节点下至少要由一位审批人员
+     * 查找新的节点配置信息
+     *
+     * @param oldNodeId 旧的节点Id
+     * @param oldNodes  旧的节点配置列表
+     * @param newNodes  新的节点配置列表
+     * @return 新的节点配置ID
      */
-    private void checkAssignee(long modelId) {
-        List<ApproveNodeConfig> approveNodeConfigs = listNodeConfig(modelId);
-        approveNodeConfigs.forEach(nodeConfig -> {
-            List<ApproveAssigneeConfig> assignees = listAssignee(nodeConfig.getId());
-            if (assignees.size() < 1) {
-                throw new ResourceNotFoundException(nodeConfig.getName() + "审批节点, 需要指定审批人员");
-            }
+    private Long findNewApproveNodeConfigId(long oldNodeId, List<ApproveNodeConfig> oldNodes, List<ApproveNodeConfig> newNodes) {
+        ApproveNodeConfig oldNodeConfig = oldNodes.stream()
+                                                  .filter(oldNode -> oldNode.getId().equals(oldNodeId))
+                                                  .findFirst()
+                                                  .orElseThrow(() -> new ResourceNotFoundException("节点复制异常，通过节点Id找不到旧的的节点配置信息，节点ID" + oldNodeId));
+        ApproveNodeConfig newNodeConfig = newNodes.stream()
+                                                  .filter(newNode -> newNode.getName().equals(oldNodeConfig.getName()))
+                                                  .findFirst()
+                                                  .orElseThrow(() -> new ResourceNotFoundException("节点复制异常，通过节点名称找不到复制的节点配置信息，节点ID" + oldNodeId));
+        return newNodeConfig.getId();
+    }
+
+    /**
+     * TODO 待优化
+     */
+    private List<ApproveNodeConfig> copyListBean(List<ApproveNodeConfig> old) {
+        List<ApproveNodeConfig> nodeConfigs = new ArrayList<>(old.size());
+        old.forEach(o -> {
+            ApproveNodeConfig approveNodeConfig = new ApproveNodeConfig();
+            BeanUtils.copyProperties(o, approveNodeConfig);
+            nodeConfigs.add(approveNodeConfig);
         });
+
+        return nodeConfigs;
+    }
+
+    private List<ApproveAssigneeConfigDTO> assigneeTransform(List<ApproveAssigneeConfig> approveAssigneeConfigs) {
+        return approveAssigneeConfigs.stream().map(assigneeConfig -> {
+            ApproveAssigneeConfigDTO approveAssigneeConfigDTO = new ApproveAssigneeConfigDTO();
+            BeanUtils.copyProperties(assigneeConfig, approveAssigneeConfigDTO);
+            approveAssigneeConfigDTO.setAssigneeName(assigneeConfig.getAssignee() + "name TODO 待修改!");
+            // 候选人信息转换
+            List<Long> transferCandidates = assigneeConfig.getTransferCandidates();
+            if (transferCandidates.size() > 0) {
+                List<String> transferCandidateNames = new ArrayList<>();
+                transferCandidates.forEach(transfer -> transferCandidateNames.add(transfer + " 转办人姓名 TODO待修改转换！"));
+                approveAssigneeConfigDTO.setTransferCandidateNames(transferCandidateNames);
+            }
+
+            return approveAssigneeConfigDTO;
+        }).sorted(Comparator.comparing(ApproveAssigneeConfig::getOrderNum)).collect(Collectors.toList());
     }
 }

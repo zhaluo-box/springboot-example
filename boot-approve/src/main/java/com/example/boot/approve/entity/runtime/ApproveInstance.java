@@ -35,10 +35,6 @@ public class ApproveInstance {
      */
     private long approveModelId;
 
-    /**
-     * 审批模板版本号
-     */
-    private int approveModelVersion;
 
     /**
      * 发起原因
