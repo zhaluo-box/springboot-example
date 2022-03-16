@@ -1,5 +1,8 @@
 package com.example.boot.approve.entity.runtime;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.boot.approve.entity.common.BaseApproveNode;
 import com.example.boot.approve.enums.ApproveResult;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,11 +21,13 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@TableName(value = "approve_node_record", autoResultMap = true)
 public class ApproveNodeRecord extends BaseApproveNode {
 
     /**
      * ID
      */
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -37,5 +42,10 @@ public class ApproveNodeRecord extends BaseApproveNode {
      * 审批实例ID
      */
     private long instanceId;
+
+    /**
+     * 审批配置节点ID
+     */
+    private long nodeConfigId;
 
 }

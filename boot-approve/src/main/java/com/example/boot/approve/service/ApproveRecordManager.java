@@ -15,6 +15,7 @@ public interface ApproveRecordManager {
      *
      * @param paramId 审批参数与发起审批的数据关联 通常为具有唯一性的主键ID
      * @param model   正式启用的审批模板
+     * @param reason  发起原因
      */
-    void createInstance(long paramId, ApproveModel model);
+    void createInstance(long paramId, ApproveModel model, String reason);
 }

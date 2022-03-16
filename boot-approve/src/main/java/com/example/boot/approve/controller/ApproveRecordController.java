@@ -34,10 +34,10 @@ public class ApproveRecordController {
      * @param modelName  审批模板名称
      */
     @PostMapping("instances/")
-    public ResponseEntity<Void> createInstance(@RequestParam long instanceId, @RequestParam String modelName) {
+    public ResponseEntity<Void> createInstance(@RequestParam long instanceId, @RequestParam String modelName, @RequestParam(required = false) String reason) {
 
         ApproveModel model = approveRecordValidator.verifyApproveModelIsAvailable(modelName);
-        approveRecordManager.createInstance(instanceId, model);
+        approveRecordManager.createInstance(instanceId, model, reason);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

@@ -12,10 +12,11 @@ import com.example.boot.approve.entity.common.BaseApproveNode;
 import com.example.boot.approve.entity.config.ApproveAssigneeConfig;
 import com.example.boot.approve.entity.config.ApproveModel;
 import com.example.boot.approve.entity.config.ApproveNodeConfig;
-import com.example.boot.approve.mapper.ApproveAssigneeConfigMapper;
 import com.example.boot.approve.mapper.ApproveModelMapper;
-import com.example.boot.approve.mapper.ApproveNodeConfigMapper;
 import com.example.boot.approve.service.ApproveConfigManager;
+import com.example.boot.approve.view.ApproveAssigneeConfigView;
+import com.example.boot.approve.view.ApproveModelView;
+import com.example.boot.approve.view.ApproveNodeConfigView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,13 +40,13 @@ import java.util.stream.Collectors;
 public class DefaultApproveConfigManager implements ApproveConfigManager {
 
     @Autowired
-    private ApproveModelMapper approveModelMapper;
+    private ApproveModelView approveModelView;
 
     @Autowired
-    private ApproveNodeConfigMapper approveNodeConfigMapper;
+    private ApproveNodeConfigView approveNodeConfigView;
 
     @Autowired
-    private ApproveAssigneeConfigMapper approveAssigneeConfigMapper;
+    private ApproveAssigneeConfigView approveAssigneeConfigView;
 
     // ===========================审批模板配置===============================
 
@@ -55,7 +56,7 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
                                                                                    .eq(StringUtils.hasLength(serviceName), ApproveModel::getServiceName,
                                                                                        serviceName)
                                                                                    .eq(StringUtils.hasLength(modelName), ApproveModel::getName, modelName);
-        return approveModelMapper.selectList(wrapper);
+        return approveModelView.getBaseMapper().selectList(wrapper);
     }
 
     @Override
@@ -66,19 +67,26 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
                                                                                             serviceName)
                                                                                         .eq(StringUtils.hasLength(modelName), ApproveModel::getName, modelName);
 
-        return approveModelMapper.selectPage(page, queryWrapper);
+        return approveModelView.getBaseMapper().selectPage(page, queryWrapper);
     }
 
+    @Autowired
+    private ApproveModelMapper approveModelMapper;
+
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public void saveModel(ApproveModel model) {
+        ApproveModel model1 = new ApproveModel();
+        BeanUtils.copyProperties(model, model1);
         approveModelMapper.insert(model);
+        log.info(model.toString());
+        approveModelView.saveOrUpdate(model1);
+        log.info(model1.toString());
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void updateModel(ApproveModel model) {
-        approveModelMapper.updateById(model);
+        approveModelView.getBaseMapper().updateById(model);
     }
 
     @Override
@@ -86,42 +94,29 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
     public void copyModel(long modelId) {
 
         // 模板复制
-        ApproveModel approveModel = approveModelMapper.selectById(modelId);
-        List<ApproveNodeConfig> oldNodeConfigs = listNodeConfig(modelId);
-        List<ApproveNodeConfig> oldNodeConfigSnapshot = copyListBean(oldNodeConfigs); // 节点信息快照
-
+        ApproveModel approveModel = approveModelView.getBaseMapper().selectById(modelId);
+        List<ApproveNodeConfig> nodeConfigs = listNodeConfig(modelId);
         LambdaQueryWrapper<ApproveAssigneeConfig> query = new QueryWrapper<ApproveAssigneeConfig>().lambda()
                                                                                                    .in(ApproveAssigneeConfig::getApproveNodeId,
-                                                                                                       oldNodeConfigs.stream()
-                                                                                                                     .map(ApproveNodeConfig::getId)
-                                                                                                                     .collect(Collectors.toUnmodifiableList()));
-        List<ApproveAssigneeConfig> oldAssigneeConfigList = approveAssigneeConfigMapper.selectList(query);
+                                                                                                       nodeConfigs.stream()
+                                                                                                                  .map(ApproveNodeConfig::getId)
+                                                                                                                  .collect(Collectors.toUnmodifiableList()));
+        List<ApproveAssigneeConfig> assigneeConfigs = approveAssigneeConfigView.getBaseMapper().selectList(query);
 
         // 版本号自动+1 存为草稿
-        int x = approveModelMapper.selectMaxVersionByModelId(modelId);
+        int x = approveModelView.getBaseMapper().selectMaxVersionByModelId(modelId);
         approveModel.setVersion(x + 1).setDisabled(true).setStatus(ApproveModel.ApproveModelStatus.DRAFT).setId(null);
         saveModel(approveModel);
 
-        // 节点信息复制 通过版本号，名称，应用名称 查出最新复制的审批模板
-        ApproveModel newModel = approveModelMapper.selectOne(new QueryWrapper<ApproveModel>().lambda()
-                                                                                             .eq(ApproveModel::getVersion, x + 1)
-                                                                                             .eq(ApproveModel::getName, approveModel.getName())
-                                                                                             .eq(ApproveModel::getServiceName, approveModel.getServiceName()));
-
-        oldNodeConfigs.stream()
-                      .peek(nodeConfig -> nodeConfig.setApproveModelId(newModel.getId()))
-                      .peek(approveNodeConfig -> approveNodeConfig.setId(null))
-                      .forEach(approveNodeConfigMapper::insert);
+        log.info("审批模板ID,{}", approveModel.getId());
+        // 节点配置信息复制
+        nodeConfigs.forEach(nodeConfig -> nodeConfig.setId(null).setApproveModelId(approveModel.getId()));
+        approveNodeConfigView.saveBatch(nodeConfigs);
 
         //审批人信息复制
-        List<ApproveNodeConfig> newNodeConfigs = approveNodeConfigMapper.selectList(
-                        new QueryWrapper<ApproveNodeConfig>().lambda().eq(ApproveNodeConfig::getApproveModelId, newModel.getId()));
-
-        oldAssigneeConfigList.stream().peek(oldAssigneeConfig -> oldAssigneeConfig.setId(null)).peek(oldAssigneeConfig -> {
-            long oldNodeId = oldAssigneeConfig.getApproveNodeId();
-            Long newNodeId = findNewApproveNodeConfigId(oldNodeId, oldNodeConfigSnapshot, newNodeConfigs);
-            oldAssigneeConfig.setApproveNodeId(newNodeId);
-        }).forEach(approveAssigneeConfigMapper::insert);
+        assigneeConfigs.forEach(oldAssigneeConfig -> oldAssigneeConfig.setId(null)
+                                                                      .setApproveNodeId(findNewApproveNodeConfigId(oldAssigneeConfig.getApproveNodeName(),
+                                                                                                                   nodeConfigs)));
 
     }
 
@@ -129,24 +124,34 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
     @Transactional(rollbackFor = Exception.class)
     public void publishModel(long modelId) {
 
-        ApproveModel approveModel = approveModelMapper.selectById(modelId);
+        ApproveModel approveModel = approveModelView.getBaseMapper().selectById(modelId);
 
         // 其他版本全部禁用
         ApproveModel model = new ApproveModel().setDisabled(true);
-        approveModelMapper.update(model, new QueryWrapper<ApproveModel>().lambda()
-                                                                         .eq(ApproveModel::getName, approveModel.getName())
-                                                                         .eq(ApproveModel::getServiceName, approveModel.getServiceName()));
+        approveModelView.getBaseMapper()
+                        .update(model, new QueryWrapper<ApproveModel>().lambda()
+                                                                       .eq(ApproveModel::getName, approveModel.getName())
+                                                                       .eq(ApproveModel::getServiceName, approveModel.getServiceName()));
         model.setStatus(ApproveModel.ApproveModelStatus.HISTORY);
 
         // 当前生效的版本 置为历史版
-        approveModelMapper.update(model, new QueryWrapper<ApproveModel>().lambda()
-                                                                         .eq(ApproveModel::getStatus, ApproveModel.ApproveModelStatus.OFFICIAL_EDITION)
-                                                                         .eq(ApproveModel::getName, approveModel.getName())
-                                                                         .eq(ApproveModel::getServiceName, approveModel.getServiceName()));
+        approveModelView.getBaseMapper()
+                        .update(model, new QueryWrapper<ApproveModel>().lambda()
+                                                                       .eq(ApproveModel::getStatus, ApproveModel.ApproveModelStatus.OFFICIAL_EDITION)
+                                                                       .eq(ApproveModel::getName, approveModel.getName())
+                                                                       .eq(ApproveModel::getServiceName, approveModel.getServiceName()));
 
         // 发布审批模板，当前版本模板禁用按钮变为false, 其他版本审批模板全部变为true
         approveModel.setStatus(ApproveModel.ApproveModelStatus.OFFICIAL_EDITION).setDisabled(false);
-        approveModelMapper.updateById(approveModel);
+        approveModelView.getBaseMapper().updateById(approveModel);
+    }
+
+    @Override
+    public ApproveModel findOfficialEditionModel(String modelName) {
+        return approveModelView.getBaseMapper()
+                               .selectOne(new QueryWrapper<ApproveModel>().lambda()
+                                                                          .eq(ApproveModel::getName, modelName)
+                                                                          .eq(ApproveModel::getStatus, ApproveModel.ApproveModelStatus.OFFICIAL_EDITION));
     }
 
     // ===========================审批节点配置===============================
@@ -154,19 +159,20 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
     @Override
     public List<ApproveNodeConfig> listNodeConfig(long modelId) {
         // 查询与模板ID关联的所有审批节点配置
-        return approveNodeConfigMapper.selectList(new QueryWrapper<ApproveNodeConfig>().lambda().eq(ApproveNodeConfig::getApproveModelId, modelId));
+        return approveNodeConfigView.getBaseMapper()
+                                    .selectList(new QueryWrapper<ApproveNodeConfig>().lambda().eq(ApproveNodeConfig::getApproveModelId, modelId));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveNode(ApproveNodeConfig nodeConfig) {
-        approveNodeConfigMapper.insert(nodeConfig);
+        approveNodeConfigView.getBaseMapper().insert(nodeConfig);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateNode(ApproveNodeConfig nodeConfig) {
-        approveNodeConfigMapper.updateById(nodeConfig);
+        approveNodeConfigView.getBaseMapper().updateById(nodeConfig);
     }
 
     /**
@@ -175,18 +181,16 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteNode(long nodeId) {
-
-        // TODO 检查当前审批模板是否只有一级节点 如果只剩下一级节点 不允许删除，至少需要一级审批人
-
-        approveNodeConfigMapper.deleteById(nodeId);
-        //删除关联审批人
+        // 删除节点配置与关联的审批人配置
+        approveNodeConfigView.getBaseMapper().deleteById(nodeId);
         listAssignee(nodeId).forEach(assigneeConfig -> deleteAssignee(assigneeConfig.getId()));
     }
 
     @Override
     public List<ApproveAssigneeConfig> listAssignee(long nodeId) {
         // 查询节点关联的所有审批人配置
-        return approveAssigneeConfigMapper.selectList(new QueryWrapper<ApproveAssigneeConfig>().lambda().eq(ApproveAssigneeConfig::getApproveNodeId, nodeId));
+        return approveAssigneeConfigView.getBaseMapper()
+                                        .selectList(new QueryWrapper<ApproveAssigneeConfig>().lambda().eq(ApproveAssigneeConfig::getApproveNodeId, nodeId));
     }
 
     // ========================审批人================================
@@ -195,26 +199,28 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
     @Transactional(rollbackFor = Exception.class)
     public void saveAssignee(ApproveAssigneeConfig assigneeConfig) {
         // 添加节点审批人
-        approveAssigneeConfigMapper.insert(assigneeConfig);
+        approveAssigneeConfigView.getBaseMapper().insert(assigneeConfig);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteAssignee(long assigneeId) {
         // 删除审批人
-        approveAssigneeConfigMapper.deleteById(assigneeId);
+        approveAssigneeConfigView.getBaseMapper().deleteById(assigneeId);
 
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateAssignee(ApproveAssigneeConfig assigneeConfig) {
         // 更新审批人
-        approveAssigneeConfigMapper.updateById(assigneeConfig);
+        approveAssigneeConfigView.getBaseMapper().updateById(assigneeConfig);
     }
 
     @Override
     public ApproveModelConfigPreviewDTO preview(long modelId) {
 
-        ApproveModel approveModel = approveModelMapper.selectById(modelId);
+        ApproveModel approveModel = approveModelView.getBaseMapper().selectById(modelId);
         // 获取审批节点相关信息
         List<ApproveNodeConfig> approveNodeConfigs = listNodeConfig(modelId);
 
@@ -235,40 +241,6 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
         return previewDTO;
     }
 
-    /**
-     * 查找新的节点配置信息
-     *
-     * @param oldNodeId 旧的节点Id
-     * @param oldNodes  旧的节点配置列表
-     * @param newNodes  新的节点配置列表
-     * @return 新的节点配置ID
-     */
-    private Long findNewApproveNodeConfigId(long oldNodeId, List<ApproveNodeConfig> oldNodes, List<ApproveNodeConfig> newNodes) {
-        ApproveNodeConfig oldNodeConfig = oldNodes.stream()
-                                                  .filter(oldNode -> oldNode.getId().equals(oldNodeId))
-                                                  .findFirst()
-                                                  .orElseThrow(() -> new ResourceNotFoundException("节点复制异常，通过节点Id找不到旧的的节点配置信息，节点ID" + oldNodeId));
-        ApproveNodeConfig newNodeConfig = newNodes.stream()
-                                                  .filter(newNode -> newNode.getName().equals(oldNodeConfig.getName()))
-                                                  .findFirst()
-                                                  .orElseThrow(() -> new ResourceNotFoundException("节点复制异常，通过节点名称找不到复制的节点配置信息，节点ID" + oldNodeId));
-        return newNodeConfig.getId();
-    }
-
-    /**
-     * TODO 待优化
-     */
-    private List<ApproveNodeConfig> copyListBean(List<ApproveNodeConfig> old) {
-        List<ApproveNodeConfig> nodeConfigs = new ArrayList<>(old.size());
-        old.forEach(o -> {
-            ApproveNodeConfig approveNodeConfig = new ApproveNodeConfig();
-            BeanUtils.copyProperties(o, approveNodeConfig);
-            nodeConfigs.add(approveNodeConfig);
-        });
-
-        return nodeConfigs;
-    }
-
     private List<ApproveAssigneeConfigDTO> assigneeTransform(List<ApproveAssigneeConfig> approveAssigneeConfigs) {
         return approveAssigneeConfigs.stream().map(assigneeConfig -> {
             ApproveAssigneeConfigDTO approveAssigneeConfigDTO = new ApproveAssigneeConfigDTO();
@@ -284,5 +256,13 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
 
             return approveAssigneeConfigDTO;
         }).sorted(Comparator.comparing(ApproveAssigneeConfig::getOrderNum)).collect(Collectors.toList());
+    }
+
+    private long findNewApproveNodeConfigId(String approveNodeName, List<ApproveNodeConfig> nodeConfigs) {
+        return nodeConfigs.stream()
+                          .filter(nodeConfig -> nodeConfig.getName().equals(approveNodeName))
+                          .map(ApproveNodeConfig::getId)
+                          .findFirst()
+                          .orElseThrow(() -> new ResourceNotFoundException("未找到审批节点为" + approveNodeName + "的配置信息"));
     }
 }

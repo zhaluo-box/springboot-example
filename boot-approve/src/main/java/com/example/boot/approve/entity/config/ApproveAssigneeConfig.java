@@ -43,6 +43,11 @@ public class ApproveAssigneeConfig {
     private long approveNodeId;
 
     /**
+     * 审批节点配置名称
+     */
+    private String approveNodeName;
+
+    /**
      * 序号
      */
     private int orderNum;
@@ -58,9 +63,9 @@ public class ApproveAssigneeConfig {
     private boolean supportTransfer;
 
     /**
-     * 转办人员Id 目前只支持一个
+     * 转办人员候选人员
      */
-    @TableField(value = "transfer_candidates", typeHandler = ListToStringTypeHandler.class)
+    @TableField(typeHandler = ListToStringTypeHandler.class)
     private List<Long> transferCandidates = new ArrayList<>();
 
     /**

@@ -1,6 +1,6 @@
 package com.example.boot.approve.mapper;
 
-import com.example.boot.approve.common.mybaitsplus.MyBaseMapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.boot.approve.entity.config.ApproveNodeConfig;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,6 +10,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @author zl
  */
 @Mapper
-public interface ApproveNodeConfigMapper extends MyBaseMapper<ApproveNodeConfig> {
+public interface ApproveNodeConfigMapper extends BaseMapper<ApproveNodeConfig> {
 
 }

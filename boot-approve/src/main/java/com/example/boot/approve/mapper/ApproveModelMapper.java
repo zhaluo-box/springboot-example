@@ -1,8 +1,7 @@
 package com.example.boot.approve.mapper;
 
-import com.example.boot.approve.common.mybaitsplus.MyBaseMapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.boot.approve.entity.config.ApproveModel;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 /**
@@ -10,8 +9,7 @@ import org.apache.ibatis.annotations.Select;
  *
  * @author wmz
  */
-@Mapper
-public interface ApproveModelMapper extends MyBaseMapper<ApproveModel> {
+public interface ApproveModelMapper extends BaseMapper<ApproveModel> {
 
     /**
      * 查询当前模板的最大版本号
