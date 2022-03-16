@@ -12,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -54,7 +55,7 @@ public class ApproveRunningRecord {
     private String remarks;
 
     /**
-     * 审批结果
+     * 审批结果 默认处于审批中，在通知的时候将审批状态改为待审批
      */
     private ApproveResult result;
 
@@ -103,5 +104,15 @@ public class ApproveRunningRecord {
      * 驳回节点等级
      */
     private long rejectNodeLevel;
+
+    /**
+     * 审批记录创建的时间
+     */
+    private Date createTime;
+
+    /**
+     * 审批时间
+     */
+    private Date lastModifyTime;
 
 }

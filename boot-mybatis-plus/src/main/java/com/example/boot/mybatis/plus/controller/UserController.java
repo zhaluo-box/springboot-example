@@ -4,11 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.boot.mybatis.plus.entiry.User;
 import com.example.boot.mybatis.plus.mapper.UserMapper;
+import com.example.boot.mybatis.plus.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,6 +24,9 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private UserService userService;
+
     /**
      * 测试BaseMapper 自带的CRUD
      */
@@ -41,7 +42,6 @@ public class UserController {
     /**
      * 查询列表多个
      *
-     * @return
      * @see com.baomidou.mybatisplus.core.mapper.BaseMapper#selectList(Wrapper) wrapper 可以为null;
      * @see Wrapper
      */
@@ -49,6 +49,11 @@ public class UserController {
     public List<User> list() {
         //TODO  使用wrapper
         return userMapper.selectList(null);
+    }
+
+    @PostMapping
+    public void insertUser(@RequestBody User user) {
+        userService.insert(user);
     }
 
 }

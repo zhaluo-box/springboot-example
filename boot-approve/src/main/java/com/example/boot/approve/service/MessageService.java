@@ -17,4 +17,12 @@ public interface MessageService {
      * @param message   消息
      */
     void notifyMessage(List<Long> receivers, String message);
+
+    /**
+     * 通知单个审批人
+     *
+     * @param receiver
+     * @param message
+     */
+    void notifyMessage(long receiver, String message);
 }

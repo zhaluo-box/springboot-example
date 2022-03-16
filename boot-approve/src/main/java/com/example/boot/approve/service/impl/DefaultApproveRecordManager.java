@@ -10,7 +10,6 @@ import com.example.boot.approve.entity.runtime.ApproveNodeRecord;
 import com.example.boot.approve.entity.runtime.ApproveRunningRecord;
 import com.example.boot.approve.service.ApproveConfigManager;
 import com.example.boot.approve.service.ApproveRecordManager;
-import com.example.boot.approve.service.MessageService;
 import com.example.boot.approve.view.ApproveInstanceView;
 import com.example.boot.approve.view.ApproveNodeRecordView;
 import com.example.boot.approve.view.ApproveRunningRecordView;
@@ -47,7 +46,7 @@ public class DefaultApproveRecordManager implements ApproveRecordManager {
     private ApproveRunningRecordView approveRunningRecordView;
 
     @Autowired
-    private MessageService messageService;
+    private ApproveRunningHelper approveRunningHelper;
 
     @Override
     @Transactional
@@ -65,13 +64,18 @@ public class DefaultApproveRecordManager implements ApproveRecordManager {
         List<ApproveNodeRecord> nodeRecords = nodeConfigs.stream().map(nodeConfig -> {
             ApproveNodeRecord approveNodeRecord = new ApproveNodeRecord();
             BeanUtils.copyProperties(nodeConfig, approveNodeRecord);
-            approveNodeRecord.setInstanceId(instanceId).setNodeConfigId(nodeConfig.getId());
+            approveNodeRecord.setInstanceId(instanceId).setNodeConfigId(nodeConfig.getId()).setId(null);
             return approveNodeRecord;
         }).collect(Collectors.toList());
         approveNodeRecordView.saveBatch(nodeRecords);
 
         // 创建审批人记录【对审批人是发起者做特殊处理】
-        List<ApproveRunningRecord> runningRecordList = nodeRecords.stream().flatMap(this::getApproveRunningRecordStream).collect(Collectors.toList());
+        List<ApproveRunningRecord> runningRecordList = nodeRecords.stream()
+                                                                  .flatMap(this::getApproveRunningRecordStream)
+                                                                  .peek(approveRunningRecord -> approveRunningRecord.setId(null)
+                                                                                                                    .setCreateTime(new Date())
+                                                                                                                    .setLastModifyTime(new Date()))
+                                                                  .collect(Collectors.toList());
         approveRunningRecordView.saveBatch(runningRecordList);
 
         // 下一级节点与审批人
@@ -88,8 +92,7 @@ public class DefaultApproveRecordManager implements ApproveRecordManager {
         approveInstanceView.updateById(approveInstance);
 
         String message = "有一则【" + model.getName() + "】审批带您处理!";
-        // TODO 发送通知消息，通知所有的下一级审批人
-        messageService.notifyMessage(nextAssignees, message);
+        approveRunningHelper.notifiedNextNodeAssignee(nextNodeRecord, message, true);
 
     }
 

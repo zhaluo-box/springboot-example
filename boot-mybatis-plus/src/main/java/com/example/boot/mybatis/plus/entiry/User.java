@@ -15,24 +15,14 @@ import java.util.Date;
  * @author zl
  */
 @Data
-// TODO　验证schema 结合filter 实现schema 切换
-@TableName("user")
+@TableName(value = "user", autoResultMap = true)
 public class User {
-
     @TableId(type = IdType.AUTO)
-    private Integer id;
+    private Long id;
 
-    @TableField(value = "name", jdbcType = JdbcType.VARCHAR)
     private String name;
 
-    private int age;
+    private Integer age;
 
-    private int tel;
-
-    private Date create_time;
-
-    private Date update_time;
-
-    private int version;
-
+    private String email;
 }

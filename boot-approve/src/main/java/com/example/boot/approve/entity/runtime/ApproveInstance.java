@@ -44,6 +44,11 @@ public class ApproveInstance {
     private long approveModelId;
 
     /**
+     * 审批名称 => 继承审批模板的名称
+     */
+    private String name;
+
+    /**
      * 发起原因
      */
     private String reason;

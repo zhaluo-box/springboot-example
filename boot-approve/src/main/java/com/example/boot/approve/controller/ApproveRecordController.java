@@ -25,6 +25,7 @@ public class ApproveRecordController {
 
     @Autowired
     private ApproveRecordValidator approveRecordValidator;
+
     // TODO: 2022/3/14 测试使用，通常审批实例的添加分散在不同的模块下
 
     /**
@@ -40,4 +41,25 @@ public class ApproveRecordController {
         approveRecordManager.createInstance(instanceId, model, reason);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    /**
+     * 查看审批详情
+     */
+
+    /**
+     * 待我审批
+     */
+
+    /**
+     * 我发起的审批
+     */
+
+    /**
+     * 我审批的【拒绝 驳回 通过】
+     */
+
+    /**
+     * 我转办的
+     */
+
 }

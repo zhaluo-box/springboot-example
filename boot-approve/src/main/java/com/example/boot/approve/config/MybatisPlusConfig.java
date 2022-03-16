@@ -4,9 +4,6 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.session.ExecutorType;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,16 +25,16 @@ public class MybatisPlusConfig {
 
     /**
      * TODO 优化  批量执行 重点关心事务
-     * mybatis-spring 提供的批量操作
+     * mybatis-spring 提供的批量操作, 配置了这个会影响mybatis_plus 插入返回主键， sqlSession 无法自动提交
      */
-    @Bean
-    public SqlSessionTemplate sqlSessionBatchTemplate(SqlSessionFactory sqlSessionFactory) {
-        log.info("创建批量操作SqlSessionTemplate");
-        return new SqlSessionTemplate(sqlSessionFactory, ExecutorType.BATCH);
-    }
+    //    @Bean
+    //    public SqlSessionTemplate sqlSessionBatchTemplate(SqlSessionFactory sqlSessionFactory) {
+    //        log.info("创建批量操作SqlSessionTemplate");
+    //        return new SqlSessionTemplate(sqlSessionFactory, ExecutorType.BATCH);
+    //    }
 
-    @Bean
-    public EasySqlInjector easySqlInjector() {
-        return new EasySqlInjector();
-    }
+    //    @Bean
+    //    public EasySqlInjector easySqlInjector() {
+    //        return new EasySqlInjector();
+    //    }
 }

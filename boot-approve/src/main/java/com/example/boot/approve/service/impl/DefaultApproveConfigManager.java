@@ -12,7 +12,6 @@ import com.example.boot.approve.entity.common.BaseApproveNode;
 import com.example.boot.approve.entity.config.ApproveAssigneeConfig;
 import com.example.boot.approve.entity.config.ApproveModel;
 import com.example.boot.approve.entity.config.ApproveNodeConfig;
-import com.example.boot.approve.mapper.ApproveModelMapper;
 import com.example.boot.approve.service.ApproveConfigManager;
 import com.example.boot.approve.view.ApproveAssigneeConfigView;
 import com.example.boot.approve.view.ApproveModelView;
@@ -70,18 +69,10 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
         return approveModelView.getBaseMapper().selectPage(page, queryWrapper);
     }
 
-    @Autowired
-    private ApproveModelMapper approveModelMapper;
-
     @Override
     @Transactional
     public void saveModel(ApproveModel model) {
-        ApproveModel model1 = new ApproveModel();
-        BeanUtils.copyProperties(model, model1);
-        approveModelMapper.insert(model);
-        log.info(model.toString());
-        approveModelView.saveOrUpdate(model1);
-        log.info(model1.toString());
+        approveModelView.save(model);
     }
 
     @Override
@@ -117,6 +108,8 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
         assigneeConfigs.forEach(oldAssigneeConfig -> oldAssigneeConfig.setId(null)
                                                                       .setApproveNodeId(findNewApproveNodeConfigId(oldAssigneeConfig.getApproveNodeName(),
                                                                                                                    nodeConfigs)));
+
+        approveAssigneeConfigView.saveBatch(assigneeConfigs);
 
     }
 

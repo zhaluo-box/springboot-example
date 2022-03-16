@@ -18,6 +18,13 @@ public class DefaultMessageService implements MessageService {
     @Override
     @Transactional
     public void notifyMessage(List<Long> receivers, String message) {
-        // 消息保存到数据库
+        // 考虑批量保存，不走循环
+        receivers.forEach(r -> this.notifyMessage(r, message));
+    }
+
+    @Override
+    @Transactional
+    public void notifyMessage(long receiver, String message) {
+        // TODO 消息保存到数据库
     }
 }

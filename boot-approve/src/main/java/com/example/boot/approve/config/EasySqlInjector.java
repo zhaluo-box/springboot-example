@@ -13,6 +13,7 @@ import java.util.List;
  * @see <a herf="https://gitee.com/baomidou/mybatis-plus-samples/blob/master/mybatis-plus-sample-sql-injector/src/main/java/com/baomidou/samples/injector/base/MySqlInjector.java/>" />
  * Created  on 2022/3/11 15:15:14
  */
+@Deprecated
 public class EasySqlInjector extends DefaultSqlInjector {
 
     @Override

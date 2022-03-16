@@ -7,31 +7,25 @@ spring:
     url: jdbc:mysql://192.168.13.10:3306/boot-approve?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
     username: root
     password: root
-  #mybatis-plus:
-  #  type-aliases-package: com.example.boot.approve.mapper
-  #  configuration:
-  #    map-underscore-to-camel-case: true #驼峰自动映射
-  #    lazy-loading-enabled: true
-  #    multiple-result-sets-enabled: true
-  #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 日志控制级别
-  #  global-config:
-  #    banner: false
-  #    db-config:
-  #      id-type: ASSIGN_ID
-  #      table-underline: true
-  #  mapper-locations: classpath*:/mapper/**/*.xml
-
-
 mybatis-plus:
-  type-aliases-package: com.example.boot.approve
-  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.example.boot.approve.mapper
   configuration:
-    map-underscore-to-camel-case: true
+    map-underscore-to-camel-case: true #驼峰自动映射
     lazy-loading-enabled: true
     multiple-result-sets-enabled: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 日志控制级别
   global-config:
     banner: false
     db-config:
-      id-type: assign_id
+      id-type: AUTO
       table-underline: true
+  mapper-locations: classpath*:/mapper/**/*.xml
+
+logging:
+  level:
+    root: info
+    #    org.springframework.web: DEBUG
+    com.example.boot.approve: debug
+    org.apache.ibatis.logging.stdout.StdOutImpl: info
+  file:
+    name: log/boot-approve.log
