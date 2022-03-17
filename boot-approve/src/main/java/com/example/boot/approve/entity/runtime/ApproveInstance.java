@@ -54,6 +54,11 @@ public class ApproveInstance {
     private String reason;
 
     /**
+     * 取消的原因
+     */
+    private String cancelReason;
+
+    /**
      * 审批发起人
      */
     private long initiator;
@@ -61,7 +66,12 @@ public class ApproveInstance {
     /**
      * 审批发起时间
      */
-    private Date initiateTime;
+    private Date createTime;
+
+    /**
+     * 最后修改时间
+     */
+    private Date lastModifyTime;
 
     /**
      * 参数ID [通常发起审批的节点会绑定审批实例ID， 而审批实例也会反向绑定发起审批的ID，

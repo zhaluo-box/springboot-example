@@ -5,6 +5,7 @@ package com.example.boot.approve.service;
  *
  * @author zl
  */
+@Deprecated
 public abstract class AbstractApproveRuntimeService implements ApproveRuntimeService {
 
     protected abstract ApproveRuntimeService getApproveRuntimeService();

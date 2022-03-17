@@ -7,6 +7,8 @@ package com.example.boot.approve.enums;
  */
 public enum ApproveResult {
 
+    NONE, // 审批意见初始的状态
+
     PENDING_APPROVED, // 待审批的
     IN_APPROVED, // 审批中
 

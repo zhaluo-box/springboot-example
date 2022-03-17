@@ -40,6 +40,11 @@ public class ApproveRunningRecord {
     private long nodeRecordId;
 
     /**
+     * 审批节点记录name
+     */
+    private String nodeRecordName;
+
+    /**
      * 审批实例ID 方便查询 减少表关联
      */
     private long instanceId;
@@ -55,9 +60,9 @@ public class ApproveRunningRecord {
     private String remarks;
 
     /**
-     * 审批结果 默认处于审批中，在通知的时候将审批状态改为待审批
+     * 审批结果 默认处于NONE 初始状态，在通知的时候将审批状态改为待审批
      */
-    private ApproveResult result;
+    private ApproveResult result = ApproveResult.NONE;
 
     /**
      * 权限标识符【具体能够做什么操作由具体业务限定】

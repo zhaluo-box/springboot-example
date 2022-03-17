@@ -55,7 +55,7 @@ public class DefaultApproveRecordManager implements ApproveRecordManager {
         Long modelId = model.getId();
         ApproveInstance approveInstance = new ApproveInstance();
         // TODO: 2022/3/15 发起者改为系统当前会话登录人员，目前采用写死的方式
-        approveInstance.setInitiator(100L).setInitiateTime(new Date()).setApproveModelId(modelId).setParamId(paramId).setReason(reason);
+        approveInstance.setInitiator(100L).setCreateTime(new Date()).setApproveModelId(modelId).setParamId(paramId).setReason(reason).setName(model.getName());
         approveInstanceView.save(approveInstance);
 
         // 创建节点
@@ -81,18 +81,19 @@ public class DefaultApproveRecordManager implements ApproveRecordManager {
         // 下一级节点与审批人
         ApproveNodeRecord nextNodeRecord = nodeRecords.stream()
                                                       .min(Comparator.comparing(BaseApproveNode::getLevel))
-                                                      .orElseThrow(() -> new ResourceNotFoundException("不存在下一级审批节点！审批实例Id"));
+                                                      .orElseThrow(() -> new ResourceNotFoundException("不存在下一级审批节点！审批实例Id" + instanceId));
 
-        List<Long> nextAssignees = runningRecordList.stream()
-                                                    .filter(runningRecord -> runningRecord.getNodeRecordId() == nextNodeRecord.getId())
-                                                    .map(ApproveRunningRecord::getAssignee)
-                                                    .collect(Collectors.toList());
+        List<ApproveRunningRecord> nextNodeRunningRecords = runningRecordList.stream()
+                                                                             .filter(runningRecord -> runningRecord.getNodeRecordId() == nextNodeRecord.getId())
+                                                                             .collect(Collectors.toList());
+
+        List<Long> nextAssignees = nextNodeRunningRecords.stream().map(ApproveRunningRecord::getAssignee).collect(Collectors.toList());
 
         approveInstance.setNextNodeId(nextNodeRecord.getId()).setNextNodeName(nextNodeRecord.getName()).setNextAssignees(nextAssignees);
         approveInstanceView.updateById(approveInstance);
 
         String message = "有一则【" + model.getName() + "】审批带您处理!";
-        approveRunningHelper.notifiedNextNodeAssignee(nextNodeRecord, message, true);
+        approveRunningHelper.notifiedNextNodeAssignee(nextNodeRunningRecords, message, true);
 
     }
 
@@ -101,7 +102,7 @@ public class DefaultApproveRecordManager implements ApproveRecordManager {
         return assigneeConfigs.stream().map(assigneeConfig -> {
             ApproveRunningRecord runningRecord = new ApproveRunningRecord();
             BeanUtils.copyProperties(assigneeConfig, runningRecord);
-            runningRecord.setNodeRecordId(nodeRecord.getId()); // 设置审批节点记录的ID
+            runningRecord.setNodeRecordId(nodeRecord.getId()).setNodeRecordName(nodeRecord.getName()); // 设置审批节点记录的ID
             // 是否是发起人
             if (assigneeConfig.isInitiator()) {
                 runningRecord.setAssignee(100L); // TODO 发起人 替换为从取值系统登录人员信息

@@ -63,6 +63,7 @@ public class ApproveModel {
     /**
      * 服务ID 【保留字段,微服务的时候用来与模板名称确定唯一，也是微服务的一个标识】
      * 取值： spring.application.name
+     * 前端显示 可以维护系统字典 进行映射显示中文，到时候可以在某种程度上替代分类，作为分类使用
      */
     private String serviceName;
 

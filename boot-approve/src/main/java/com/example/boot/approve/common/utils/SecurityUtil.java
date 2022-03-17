@@ -18,10 +18,14 @@ public final class SecurityUtil {
 
     private static final List<User> USERS = new ArrayList<>(4);
 
-    private SecurityUtil() {
-        for (int i = 1; i < 5; i++) {
-            USERS.add(new User(1, "name" + 1));
+    static {
+        for (long i = 1; i < 5; i++) {
+            USERS.add(new User(i, "name" + i));
         }
+    }
+
+    private SecurityUtil() {
+       
     }
 
     public static User getCurrentLogin() {

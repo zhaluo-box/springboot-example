@@ -2,6 +2,8 @@ package com.example.boot.approve.service.impl;
 
 import com.example.boot.approve.common.exception.MesException;
 import com.example.boot.approve.common.exception.ResourceNotFoundException;
+import com.example.boot.approve.common.utils.SecurityUtil;
+import com.example.boot.approve.entity.User;
 import com.example.boot.approve.entity.runtime.ApproveInstance;
 import com.example.boot.approve.entity.runtime.ApproveNodeRecord;
 import com.example.boot.approve.entity.runtime.ApproveRunningRecord;
@@ -10,6 +12,10 @@ import com.example.boot.approve.service.MessageService;
 import com.example.boot.approve.view.ApproveInstanceView;
 import com.example.boot.approve.view.ApproveNodeRecordView;
 import com.example.boot.approve.view.ApproveRunningRecordView;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +26,12 @@ import java.util.stream.Collectors;
 
 /**
  * 审批运行协助服务， 主要做一些通用的检查 通知等业务
- * TODO 具体逻辑待实现
+ * TODO  可以优化为抽象类 让审批实现类继承
  * Created  on 2022/3/16 13:13:42
  *
  * @author zl
  */
+@Slf4j
 @Service
 public class ApproveRunningHelper {
 
@@ -41,44 +48,41 @@ public class ApproveRunningHelper {
     private ApproveInstanceView approveInstanceView;
 
     /**
-     * 通知审批人
+     * 对审批进行包装并检查
      *
-     * @param nextNodeRecord 下一级审批节点记录
-     * @param message        消息
-     * @param cancel         true 待审批 false 无需审批
+     * @param instanceId    审批实例ID
+     * @param approveHandle 这里的审批枚举指代的是审批的行为， 主要用来识别【撤销】操作
      */
-    @Transactional(rollbackFor = Exception.class)
-    public void notifiedNextNodeAssignee(ApproveNodeRecord nextNodeRecord, String message, boolean cancel) {
-        List<ApproveRunningRecord> runningRecordByCurrNode = approveRunningRecordView.findByNodeRecordId(nextNodeRecord.getId());
-        List<Long> assignees = runningRecordByCurrNode.stream()
-                                                      .peek(runningRecord -> runningRecord.setResult(ApproveResult.PENDING_APPROVED)
-                                                                                          .setLastModifyTime(new Date()))
-                                                      .map(ApproveRunningRecord::getAssignee)
-                                                      .collect(Collectors.toList());
-        approveRunningRecordView.saveBatch(runningRecordByCurrNode);
-        messageService.notifyMessage(assignees, message);
+    public ApproveWrapper findAndCheck(long instanceId, ApproveResult approveHandle) {
+
+        ApproveInstance approveInstance = this.findInstanceAndCheck(instanceId, approveHandle);
+
+        // 按照审批节点等级 查找首个审批中的节点 ,通常审批结束才会发生没有审批节点的情况
+        List<ApproveNodeRecord> pendingApprovedNodes = this.findPendingApprovedNode(instanceId);
+        ApproveWrapper approveWrapper = new ApproveWrapper(approveInstance, pendingApprovedNodes);
+
+        // TODO 登录人员信息最终需要替换
+        User currentLogin = SecurityUtil.getCurrentLogin();
+        log.debug("当前登录人员信息{}", currentLogin);
+
+        List<ApproveRunningRecord> runningRecords = approveRunningRecordView.findByNodeRecordId(approveWrapper.getCurrNode().getId());
+
+        // 有异或或者会签的情况，其他人将节点处理了 比如驳回与拒绝 就会找不到记录，因为真正的记录其实在上一节点
+        ApproveRunningRecord runningRecord = runningRecords.stream()
+                                                           .filter(rd -> rd.getAssignee() == currentLogin.getId())
+                                                           .findFirst()
+                                                           .orElseThrow(() -> new MesException("已不存在您需要处理的节点记录，如有需要请查看审批详情！"));
+
+        approveWrapper.setApproveRunningRecord(runningRecord).setCurrNodeApproveRunningRecords(runningRecords);
+        return approveWrapper;
     }
 
     /**
-     * 查找待审批的节点
-     *
-     * @param instanceId 实例ID
-     */
-    public List<ApproveNodeRecord> findPendingApprovedNode(long instanceId) {
-        return approveNodeRecordView.findNextPendingApprovedNode(instanceId, ApproveResult.PENDING_APPROVED);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public void notifiedAssignee(long initiator, String endMessage) {
-        messageService.notifyMessage(initiator, endMessage);
-    }
-
-    /**
-     * 发现并检查审批实例是已经结束
+     * 查看并检查审批实例是已经结束
      * 检查主要是针对异或， 会签的其他审批人员做了审批结束相关的处理【拒绝】或者发起人取消了审批
      *
      * @param instanceId    审批实例ID
-     * @param approveHandle 这里的审批枚举指代的是审批的行为
+     * @param approveHandle 这里的审批枚举指代的是审批的行为， 主要用来识别【撤销】操作
      */
     public ApproveInstance findInstanceAndCheck(long instanceId, ApproveResult approveHandle) {
         // 对于审批实例而言，有三个过程 待审批 审批中 结束
@@ -98,26 +102,66 @@ public class ApproveRunningHelper {
     }
 
     /**
-     * 将其他待审批记录处理为无需审批，主要是针对异或或者会签
+     * 查找待审批的节点
      *
-     * @param currNode      当前审批节点记录
-     * @param runningRecord 当前审批运行记录
+     * @param instanceId 实例ID
      */
-    @Transactional(rollbackFor = Exception.class)
-    public void otherPendingApprovedRunningRecordHandler(ApproveNodeRecord currNode, ApproveRunningRecord runningRecord) {
-        // 查询其他未审批的记录【处于待审批的记录】
-        List<ApproveRunningRecord> pendingApprove = approveRunningRecordView.findAllByNodeIdAndNotEqualIdAndResultEqPendingApproved(currNode.getId(),
-                                                                                                                                    runningRecord.getId());
-        pendingApprove.forEach(rd -> rd.setResult(ApproveResult.NO_APPROVAL_REQUIRED));
-        approveRunningRecordView.updateBatchById(pendingApprove);
+    public List<ApproveNodeRecord> findPendingApprovedNode(long instanceId) {
+        return approveNodeRecordView.findNextPendingApprovedNode(instanceId, ApproveResult.PENDING_APPROVED);
     }
 
     /**
+     * 通知审批人
+     *
+     * @param nextNodeRunningRecords 下一级审批节点记录
+     * @param message                消息
+     * @param cancel                 true 待审批 false 无需审批
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void notifiedNextNodeAssignee(List<ApproveRunningRecord> nextNodeRunningRecords, String message, boolean cancel) {
+        List<Long> assignees = nextNodeRunningRecords.stream().peek(runningRecord -> {
+            ApproveResult result = cancel ? ApproveResult.PENDING_APPROVED : ApproveResult.NO_APPROVAL_REQUIRED;
+            runningRecord.setResult(result).setLastModifyTime(new Date());
+        }).map(ApproveRunningRecord::getAssignee).collect(Collectors.toList());
+        approveRunningRecordView.updateBatchById(nextNodeRunningRecords);
+        messageService.notifyMessage(assignees, message);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void notifiedAssignee(long initiator, String endMessage) {
+        messageService.notifyMessage(initiator, endMessage);
+    }
+
+    /**
+     * 将其他待审批记录处理为无需审批，主要是针对异或或者会签
+     *
+     * @param runningRecord                 当前审批运行记录
+     * @param currNodeApproveRunningRecords 当前节点下的审批记录
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void otherPendingApprovedRunningRecordHandler(ApproveRunningRecord runningRecord, List<ApproveRunningRecord> currNodeApproveRunningRecords) {
+
+        // 查询其他未审批的记录【处于待审批的记录】
+        List<ApproveRunningRecord> otherPendingApprovedRunningRecord = currNodeApproveRunningRecords.stream()
+                                                                                                    .filter(rd -> !rd.equals(runningRecord))
+                                                                                                    .filter(rd -> rd.getResult()
+                                                                                                                    .equals(ApproveResult.PENDING_APPROVED))
+                                                                                                    .peek(rd -> rd.setResult(
+                                                                                                                    ApproveResult.NO_APPROVAL_REQUIRED))
+                                                                                                    .collect(Collectors.toList());
+
+        approveRunningRecordView.updateBatchById(otherPendingApprovedRunningRecord);
+    }
+
+    /**
+     * 重新生成当前节点与驳回节点之间的审批记录
+     *
      * @param rejectNodeLevel 驳回节点等级
      * @param currNodeLevel   结束节点等级
      * @param instanceId      实例Id
      */
-    public List<ApproveNodeRecord> findMidNodeRecord(int rejectNodeLevel, int currNodeLevel, long instanceId) {
+    public List<ApproveNodeRecord> generateMidRecord(int rejectNodeLevel, int currNodeLevel, long instanceId) {
+
         List<ApproveNodeRecord> midRecord = approveNodeRecordView.findByInstanceIdAndLevelBetween(instanceId, rejectNodeLevel, currNodeLevel);
 
         // 复制运行记录
@@ -127,14 +171,17 @@ public class ApproveRunningHelper {
                                                              .collect(Collectors.toList());
 
         midRecord.forEach(rd -> rd.setId(null));
-
         approveNodeRecordView.saveBatch(midRecord);
 
-        // TODO  节点与审批记录初始化
-
         // 复制节点
+        runningRecords.forEach(runningRecord -> {
+            long newRunningRecordId = findNewRunningRecordId(runningRecord.getNodeRecordName(), midRecord);
+            runningRecord.setNodeRecordId(newRunningRecordId).setRemarks("").setLastModifyTime(new Date());
+        });
 
-        return null;
+        approveRunningRecordView.saveBatch(runningRecords);
+
+        return midRecord;
     }
 
     private long findNewRunningRecordId(String name, List<ApproveNodeRecord> newMidRecords) {
@@ -145,19 +192,60 @@ public class ApproveRunningHelper {
                             .orElseThrow(() -> new ResourceNotFoundException("为找到名称为" + name + "的节点"));
     }
 
-    /**
-     * 查找下一级审批节点
-     */
+    @Getter
+    @Accessors(chain = true)
+    public static class ApproveWrapper {
 
-    /**
-     * 查找下一级审批人
-     */
+        /**
+         * 审批实例
+         */
+        private final ApproveInstance approveInstance;
 
-    /**
-     * 通知下一级审批人
-     */
+        /**
+         * 待审批节点
+         */
+        private final List<ApproveNodeRecord> pendingApproveNodeRecords;
 
-    /**
-     * 通知发起人
-     */
+        /**
+         * 当前节点
+         */
+        private final ApproveNodeRecord currNode;
+
+        /**
+         * 最后一个节点的标识
+         */
+        private final boolean lastNodeStatus;
+
+        /**
+         * 当前节点下的所有审批记录
+         */
+        @Setter
+        private List<ApproveRunningRecord> currNodeApproveRunningRecords;
+
+        /**
+         * 当前审批记录
+         */
+        @Setter
+        private ApproveRunningRecord approveRunningRecord;
+
+        ApproveWrapper(ApproveInstance approveInstance, List<ApproveNodeRecord> pendingApproveNodeRecords) {
+            this.approveInstance = approveInstance;
+            this.pendingApproveNodeRecords = pendingApproveNodeRecords;
+            this.lastNodeStatus = computeLastNode();
+            this.currNode = getCurrNode();
+        }
+
+        public boolean computeLastNode() {
+            return this.pendingApproveNodeRecords.size() <= 1;
+        }
+
+        public ApproveNodeRecord getCurrNode() {
+            if (this.pendingApproveNodeRecords.size() < 1) {
+                throw new MesException("审批异常： 审批未结束，但是未找到当前审批节点。请联系管理员查看！当前审批实例 " + approveInstance.toString());
+            }
+            return this.pendingApproveNodeRecords.get(0);
+        }
+    }
+
 }
+

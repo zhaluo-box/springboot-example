@@ -6,10 +6,7 @@ import com.example.boot.approve.validator.ApproveRecordValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Created  on 2022/3/14 17:17:12
@@ -43,23 +40,54 @@ public class ApproveRecordController {
     }
 
     /**
-     * 查看审批详情
-     */
-
-    /**
      * 待我审批
      */
+    @GetMapping("actions/get-pending-approves/")
+    public ResponseEntity<Void> getPendingApprove() {
+        
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
     /**
      * 我发起的审批
      */
+    @GetMapping("actions/get-initiate-approves/")
+    public ResponseEntity<Void> getInitiateApprove() {
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
     /**
      * 我审批的【拒绝 驳回 通过】
      */
+    @GetMapping("actions/get-self-approved/")
+    public ResponseEntity<Void> getSelfApproved() {
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
     /**
      * 我转办的
      */
+    @GetMapping("actions/get-transfers/")
+    public ResponseEntity<Void> getTransfer() {
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
+    /**
+     * 查看审批详情
+     * 通过参数ID 获取最近一次的审批详情
+     */
+    @GetMapping("actions/get-approve-details/")
+    public ResponseEntity<Void> getApproveDetail(@RequestParam long instanceId) {
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * 根据参数ID 查询审批历史
+     *
+     * @param paramId 参数ID
+     */
+    @GetMapping("actions/get-approve-histories/")
+    public ResponseEntity<Void> getApproveHistory(@RequestParam long paramId) {
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
