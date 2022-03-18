@@ -1,6 +1,9 @@
 package com.example.boot.approve.service;
 
 import com.example.boot.approve.entity.config.ApproveModel;
+import com.example.boot.approve.entity.runtime.ApproveNodeRecord;
+
+import java.util.List;
 
 /**
  * 审批记录管理
@@ -18,4 +21,6 @@ public interface ApproveRecordManager {
      * @param reason  发起原因
      */
     void createInstance(long paramId, ApproveModel model, String reason);
+
+    List<ApproveNodeRecord> listApproveNode(long instanceId);
 }

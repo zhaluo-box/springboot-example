@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * TODO 后期的扩展优化 基于模板方式，预留钩子方法
  * 默认的审批运行时服务实现
  * Created  on 2022/3/8 15:15:53
  *
@@ -79,15 +80,15 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
         // 节点变化
         nodeApproveHandler(currNode, runningRecord, ApproveResult.APPROVED);
         approveNodeRecordView.updateById(currNode);
+
+        // 通过 异或需要将另一位审批人置为无需审批
         if (BaseApproveNode.ApproveType.XOF.equals(currNode.getType())) {
-            log.info("异或审批当前节点直接通过！");
             approveRunningHelper.otherPendingApprovedRunningRecordHandler(runningRecord, currNodeApproveRunningRecords);
         }
 
         // 节点通过后的处理 决定是通知下一级审批人 还是审批结束了
-        approveInstance.setResult(ApproveResult.IN_APPROVED);
-        nodeApprovedPostHandler(approveInstance, pendingApprovedNodes, currNodeApproveRunningRecords, currNode.getType());
-
+        approveInstance.setResult(ApproveResult.IN_APPROVED).setLastModifyTime(new Date());
+        nodePostHandler(approveInstance, pendingApprovedNodes, currNode);
         approveInstanceView.updateById(approveInstance);
 
         final String approvedMessage = currentLogin.getName() + "通过了您的【" + approveInstance.getName() + "】审批！";
@@ -107,7 +108,7 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
         // 通过登录人员的ID以及节点ID查询对应审批记录
         User currentLogin = SecurityUtil.getCurrentLogin();
 
-        ApproveRunningHelper.ApproveWrapper approveWrapper = approveRunningHelper.findAndCheck(instanceId, ApproveResult.APPROVED);
+        ApproveRunningHelper.ApproveWrapper approveWrapper = approveRunningHelper.findAndCheck(instanceId, ApproveResult.REFUSE);
         ApproveInstance approveInstance = approveWrapper.getApproveInstance();
         ApproveNodeRecord currNode = approveWrapper.getCurrNode();
         ApproveRunningRecord runningRecord = approveWrapper.getApproveRunningRecord();
@@ -116,10 +117,11 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
         runningRecord.setResult(ApproveResult.REFUSE).setRemarks(remark);
         approveRunningRecordView.updateById(runningRecord);
 
-        // 更新节点变化
-        nodeApproveHandler(currNode, runningRecord, ApproveResult.REFUSE);
+        // 更新节点
+        currNode.setResult(ApproveResult.REFUSE);
         approveNodeRecordView.updateById(currNode);
 
+        // 拒绝  有多个审批的都需要将其他审批人置为无需处理
         if (!BaseApproveNode.ApproveType.DIRECT.equals(currNode.getType())) {
             approveRunningHelper.otherPendingApprovedRunningRecordHandler(runningRecord, currNodeApproveRunningRecords);
         }
@@ -131,6 +133,8 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
         }
 
         // 审批终止
+        approveInstance.setResult(ApproveResult.REFUSE);
+        approveInstanceView.updateById(approveInstance);
 
     }
 
@@ -138,7 +142,7 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
     @Transactional(rollbackFor = Exception.class)
     public void cancel(long instanceId, String remark) {
 
-        ApproveInstance approveInstance = approveRunningHelper.findInstanceAndCheck(instanceId, ApproveResult.REFUSE);
+        ApproveInstance approveInstance = approveRunningHelper.findInstanceAndCheck(instanceId, ApproveResult.CANCELED);
 
         // 按照审批节点等级 查找首个审批中的节点 ,通常审批结束才会发生没有审批节点的情况
         List<ApproveNodeRecord> pendingApprovedNodes = approveRunningHelper.findPendingApprovedNode(instanceId);
@@ -235,35 +239,44 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
     }
 
     /**
-     * TODO bug 审批实例的最终审批结果有问题 针对与会签和异或需要做处理 不能单独依靠是否有下一个节点做处理
-     * 节点审批通过之后的处理
+     * 节点后置处理
+     * 情景： 当前节点审批未通过， 不做任何处理
+     * 当前节点审批通过：检查是否还有待审批节点： 有 通知并更新实例下一级审批节点信息，没有则代表审批结束
      *
-     * @param approveInstance               审批实例
-     * @param pendingApprovedNodes          待审批的节点
-     * @param currNodeApproveRunningRecords 当前节点下的所有审批记录
-     * @param type                          审批节点类型
+     * @param approveInstance      审批实例
+     * @param pendingApprovedNodes 待审批的节点
+     * @param currNode             当前节点
      */
-    private void nodeApprovedPostHandler(ApproveInstance approveInstance, List<ApproveNodeRecord> pendingApprovedNodes,
-                                         List<ApproveRunningRecord> currNodeApproveRunningRecords, BaseApproveNode.ApproveType type) {
+    private void nodePostHandler(ApproveInstance approveInstance, List<ApproveNodeRecord> pendingApprovedNodes, ApproveNodeRecord currNode) {
+
+        ApproveResult currNodeResult = currNode.getResult();
+
+        if (!currNodeResult.equals(ApproveResult.APPROVED)) {
+            return;
+        }
+
         // TODO 设置为消息模板常量
         final String message = "有一则【" + approveInstance.getName() + "】审批待您处理!";
         final String endMessage = "【" + approveInstance.getName() + "】审批已结束";
 
-        // 待审批节点数量大于1 代表还有审批节点
-        if (pendingApprovedNodes.size() > 1) {
-            ApproveNodeRecord nextNode = pendingApprovedNodes.get(1);
-            List<ApproveRunningRecord> nextRunningRecords = approveRunningRecordView.findByNodeRecordId(nextNode.getId());
-            List<Long> assignees = nextRunningRecords.stream()
-                                                     .peek(runningRecord -> runningRecord.setResult(ApproveResult.PENDING_APPROVED)
-                                                                                         .setLastModifyTime(new Date()))
-                                                     .map(ApproveRunningRecord::getAssignee)
-                                                     .collect(Collectors.toList());
-            approveInstance.setNextNodeId(nextNode.getId()).setNextNodeName(nextNode.getName()).setNextAssignees(assignees);
-            approveRunningHelper.notifiedNextNodeAssignee(nextRunningRecords, message, true);
-        } else { // 如果没有待审批节点 直接审批结束，更新审批实例记录，通知发起人
+        if (pendingApprovedNodes.size() < 2) {
             approveInstance.setResult(ApproveResult.APPROVED);
             approveRunningHelper.notifiedAssignee(approveInstance.getInitiator(), endMessage);
+            return;
         }
+
+        //  待审批节点数量大于1 代表还有审批节点 且当前节点是通过的
+        ApproveNodeRecord nextNode = pendingApprovedNodes.get(1);
+        List<ApproveRunningRecord> nextRunningRecords = approveRunningRecordView.findByNodeRecordId(nextNode.getId());
+        List<Long> assignees = nextRunningRecords.stream()
+                                                 .peek(runningRecord -> runningRecord.setResult(ApproveResult.PENDING_APPROVED).setLastModifyTime(new Date()))
+                                                 .map(ApproveRunningRecord::getAssignee)
+                                                 .collect(Collectors.toList());
+
+        //  通知下一节点 并更新实例下一节点的审批人信息
+        approveInstance.setNextNodeId(nextNode.getId()).setNextNodeName(nextNode.getName()).setNextAssignees(assignees);
+        approveRunningHelper.notifiedNextNodeAssignee(nextRunningRecords, message, true);
+
     }
 
     /**
@@ -271,24 +284,25 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
      * 主要涉及到节点的审批结果 【通过 拒绝 驳回】
      *
      * @param currNode 当前节点
-     * @param result   审批通过 拒绝 驳回
+     * @param result   审批结果
      */
     private void nodeApproveHandler(ApproveNodeRecord currNode, ApproveRunningRecord runningRecord, ApproveResult result) {
         // 直签与异或 更新节点审批结果为通过，
         if (BaseApproveNode.ApproveType.DIRECT.equals(currNode.getType()) || BaseApproveNode.ApproveType.XOF.equals(currNode.getType())) {
             currNode.setResult(result);
-        } else {
-            List<ApproveRunningRecord> runningRecordByCurrNode = approveRunningRecordView.findByNodeRecordId(currNode.getId());
-            // @formatter:off 会签 ： 判定是否所有人审批通过了，如果所有人审批通过了 则节点审批结果为通过，否则不做处理
-            boolean allApproved = runningRecordByCurrNode.stream()
-                                                         .filter(record -> !record.equals(runningRecord))
-                                                         .peek(System.out::println)
-                                                         .allMatch(record -> record.getResult().equals(ApproveResult.APPROVED));
-            // @formatter:on 全部通过节点发生变化
-            if (ApproveResult.APPROVED.equals(result) && allApproved) {
-                currNode.setResult(ApproveResult.APPROVED);
-            }
+            return;
         }
+        List<ApproveRunningRecord> runningRecordByCurrNode = approveRunningRecordView.findByNodeRecordId(currNode.getId());
+        //   会签 ： 判定是否所有人审批通过了，如果所有人审批通过了 则节点审批结果为通过，否则不做处理
+        boolean allApproved = runningRecordByCurrNode.stream()
+                                                     .filter(record -> !record.equals(runningRecord))
+                                                     .peek(System.out::println)
+                                                     .allMatch(record -> record.getResult().equals(ApproveResult.APPROVED));
+        //   会签所有人同意 节点才算通过
+        if (ApproveResult.APPROVED.equals(result) && allApproved) {
+            currNode.setResult(ApproveResult.APPROVED);
+        }
+
     }
 
 }

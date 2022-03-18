@@ -119,24 +119,24 @@ public class DefaultApproveConfigManager implements ApproveConfigManager {
 
         ApproveModel approveModel = approveModelView.getBaseMapper().selectById(modelId);
 
-        // 其他版本全部禁用
-        ApproveModel model = new ApproveModel().setDisabled(true);
-        approveModelView.getBaseMapper()
-                        .update(model, new QueryWrapper<ApproveModel>().lambda()
-                                                                       .eq(ApproveModel::getName, approveModel.getName())
-                                                                       .eq(ApproveModel::getServiceName, approveModel.getServiceName()));
-        model.setStatus(ApproveModel.ApproveModelStatus.HISTORY);
+        // 其他版本处理
+        List<ApproveModel> otherModels = approveModelView.list(new QueryWrapper<ApproveModel>().lambda()
+                                                                                               .eq(ApproveModel::getName, approveModel.getName())
+                                                                                               .eq(ApproveModel::getServiceName, approveModel.getServiceName())
+                                                                                               .ne(ApproveModel::getId, approveModel.getId()));
 
-        // 当前生效的版本 置为历史版
-        approveModelView.getBaseMapper()
-                        .update(model, new QueryWrapper<ApproveModel>().lambda()
-                                                                       .eq(ApproveModel::getStatus, ApproveModel.ApproveModelStatus.OFFICIAL_EDITION)
-                                                                       .eq(ApproveModel::getName, approveModel.getName())
-                                                                       .eq(ApproveModel::getServiceName, approveModel.getServiceName()));
+        otherModels.forEach(model -> {
+            if (model.getStatus().equals(ApproveModel.ApproveModelStatus.OFFICIAL_EDITION)) {
+                model.setStatus(ApproveModel.ApproveModelStatus.HISTORY);
+            }
+            model.setDisabled(true);
+        });
+
+        approveModelView.updateBatchById(otherModels);
 
         // 发布审批模板，当前版本模板禁用按钮变为false, 其他版本审批模板全部变为true
         approveModel.setStatus(ApproveModel.ApproveModelStatus.OFFICIAL_EDITION).setDisabled(false);
-        approveModelView.getBaseMapper().updateById(approveModel);
+        approveModelView.updateById(approveModel);
     }
 
     @Override

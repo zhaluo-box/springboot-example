@@ -1,12 +1,15 @@
 package com.example.boot.approve.controller;
 
 import com.example.boot.approve.entity.config.ApproveModel;
+import com.example.boot.approve.entity.runtime.ApproveNodeRecord;
 import com.example.boot.approve.service.ApproveRecordManager;
 import com.example.boot.approve.validator.ApproveRecordValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Created  on 2022/3/14 17:17:12
@@ -40,11 +43,23 @@ public class ApproveRecordController {
     }
 
     /**
+     * TODO 具体的逻辑实现
+     * 当前实例，已被审批的节点， 用于驳回查看
+     *
+     * @param instanceId 实例ID
+     * @return 已被审批的节点列表
+     */
+    @GetMapping("node-records/list-approve-nodes/")
+    public ResponseEntity<List<ApproveNodeRecord>> listApprovedNode(@RequestParam long instanceId) {
+        return ResponseEntity.ok(approveRecordManager.listApproveNode(instanceId));
+    }
+
+    /**
      * 待我审批
      */
     @GetMapping("actions/get-pending-approves/")
     public ResponseEntity<Void> getPendingApprove() {
-        
+
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

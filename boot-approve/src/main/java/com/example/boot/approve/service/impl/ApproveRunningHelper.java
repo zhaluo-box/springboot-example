@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.Date;
 import java.util.List;
@@ -87,16 +88,17 @@ public class ApproveRunningHelper {
     public ApproveInstance findInstanceAndCheck(long instanceId, ApproveResult approveHandle) {
         // 对于审批实例而言，有三个过程 待审批 审批中 结束
         ApproveInstance approveInstance = approveInstanceView.getById(instanceId);
+        Assert.notNull(approveInstance, "审批实例不存在！实例ID： " + instanceId);
         ApproveResult result = approveInstance.getResult();
 
-        if (ApproveResult.CANCELED.equals(approveHandle) && ApproveResult.IN_APPROVED.equals(result)) {
+        if (ApproveResult.CANCELED.equals(approveHandle) && !ApproveResult.PENDING_APPROVED.equals(result)) {
             throw new MesException(approveInstance.getName() + "审批已经开始，无法取消！");
         }
 
         // 如果当前审批不是处于待审批与审批中 则审批就代表结束了
         boolean status = ApproveResult.PENDING_APPROVED.equals(result) || ApproveResult.IN_APPROVED.equals(result);
         if (!status) {
-            throw new MesException(approveInstance.getName() + "审批已经被处理，如有需要请自行查看审批详情！");
+            throw new MesException(approveInstance.getName() + "审批已经被处理，如有需要请自行查看审批详情！当前审批状态" + result);
         }
         return approveInstance;
     }
@@ -141,7 +143,7 @@ public class ApproveRunningHelper {
     @Transactional(rollbackFor = Exception.class)
     public void otherPendingApprovedRunningRecordHandler(ApproveRunningRecord runningRecord, List<ApproveRunningRecord> currNodeApproveRunningRecords) {
 
-        // 查询其他未审批的记录【处于待审批的记录】
+        // 处理其他审批记录【处于待审批的记录】
         List<ApproveRunningRecord> otherPendingApprovedRunningRecord = currNodeApproveRunningRecords.stream()
                                                                                                     .filter(rd -> !rd.equals(runningRecord))
                                                                                                     .filter(rd -> rd.getResult()
@@ -149,6 +151,12 @@ public class ApproveRunningHelper {
                                                                                                     .peek(rd -> rd.setResult(
                                                                                                                     ApproveResult.NO_APPROVAL_REQUIRED))
                                                                                                     .collect(Collectors.toList());
+
+        if (otherPendingApprovedRunningRecord.size() == 0) {
+            return;
+        }
+
+        // TODO 是否有必要通知其他审批人【无需审批了】
 
         approveRunningRecordView.updateBatchById(otherPendingApprovedRunningRecord);
     }
@@ -160,7 +168,8 @@ public class ApproveRunningHelper {
      * @param currNodeLevel   结束节点等级
      * @param instanceId      实例Id
      */
-    public List<ApproveNodeRecord> generateMidRecord(int rejectNodeLevel, int currNodeLevel, long instanceId) {
+    @Transactional(rollbackFor = Exception.class)
+    public void generateMidRecord(int rejectNodeLevel, int currNodeLevel, long instanceId) {
 
         List<ApproveNodeRecord> midRecord = approveNodeRecordView.findByInstanceIdAndLevelBetween(instanceId, rejectNodeLevel, currNodeLevel);
 
@@ -180,8 +189,6 @@ public class ApproveRunningHelper {
         });
 
         approveRunningRecordView.saveBatch(runningRecords);
-
-        return midRecord;
     }
 
     private long findNewRunningRecordId(String name, List<ApproveNodeRecord> newMidRecords) {

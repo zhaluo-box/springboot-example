@@ -8,6 +8,7 @@ import com.example.boot.approve.entity.config.ApproveNodeConfig;
 import com.example.boot.approve.entity.runtime.ApproveInstance;
 import com.example.boot.approve.entity.runtime.ApproveNodeRecord;
 import com.example.boot.approve.entity.runtime.ApproveRunningRecord;
+import com.example.boot.approve.enums.ApproveResult;
 import com.example.boot.approve.service.ApproveConfigManager;
 import com.example.boot.approve.service.ApproveRecordManager;
 import com.example.boot.approve.view.ApproveInstanceView;
@@ -69,16 +70,17 @@ public class DefaultApproveRecordManager implements ApproveRecordManager {
         }).collect(Collectors.toList());
         approveNodeRecordView.saveBatch(nodeRecords);
 
-        // 创建审批人记录【对审批人是发起者做特殊处理】
+        //@formatter:off 创建审批人记录【对审批人是发起者做特殊处理】
         List<ApproveRunningRecord> runningRecordList = nodeRecords.stream()
                                                                   .flatMap(this::getApproveRunningRecordStream)
                                                                   .peek(approveRunningRecord -> approveRunningRecord.setId(null)
+                                                                                                                    .setInstanceId(instanceId)
                                                                                                                     .setCreateTime(new Date())
                                                                                                                     .setLastModifyTime(new Date()))
                                                                   .collect(Collectors.toList());
         approveRunningRecordView.saveBatch(runningRecordList);
 
-        // 下一级节点与审批人
+        //@formatter:on 下一级节点与审批人
         ApproveNodeRecord nextNodeRecord = nodeRecords.stream()
                                                       .min(Comparator.comparing(BaseApproveNode::getLevel))
                                                       .orElseThrow(() -> new ResourceNotFoundException("不存在下一级审批节点！审批实例Id" + instanceId));
@@ -95,6 +97,11 @@ public class DefaultApproveRecordManager implements ApproveRecordManager {
         String message = "有一则【" + model.getName() + "】审批带您处理!";
         approveRunningHelper.notifiedNextNodeAssignee(nextNodeRunningRecords, message, true);
 
+    }
+
+    @Override
+    public List<ApproveNodeRecord> listApproveNode(long instanceId) {
+        return approveNodeRecordView.list(instanceId, ApproveResult.APPROVED);
     }
 
     private Stream<ApproveRunningRecord> getApproveRunningRecordStream(ApproveNodeRecord nodeRecord) {

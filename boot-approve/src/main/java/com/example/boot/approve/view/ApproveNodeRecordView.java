@@ -44,4 +44,10 @@ public class ApproveNodeRecordView extends ServiceImpl<ApproveNodeRecordMapper, 
                                                                                .eq(ApproveNodeRecord::getInstanceId, instanceId)
                                                                                .between(BaseApproveNode::getLevel, rejectNodeLevel, currNodeLevel));
     }
+
+    public List<ApproveNodeRecord> list(long instanceId, ApproveResult approveResult) {
+        return list(new QueryWrapper<ApproveNodeRecord>().lambda()
+                                                         .eq(instanceId > 0, ApproveNodeRecord::getInstanceId, instanceId)
+                                                         .eq(approveResult != null, ApproveNodeRecord::getResult, approveResult));
+    }
 }

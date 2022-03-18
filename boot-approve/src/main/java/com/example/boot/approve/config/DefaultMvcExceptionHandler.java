@@ -79,6 +79,7 @@ public class DefaultMvcExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<String> handle(Exception exception) {
+        // TODO 添加ExceptionUtils 遇到空指针等一些异常 getMessage 会出现null  返回前端只有500 没有具体的显示
         log.warn(exception.getMessage(), exception);
         return buildResultMap(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
     }
