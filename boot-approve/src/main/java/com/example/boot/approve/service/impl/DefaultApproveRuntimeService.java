@@ -220,26 +220,25 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
         ApproveRunningRecord newRunningRecord = new ApproveRunningRecord();
         BeanUtils.copyProperties(runningRecord, newRunningRecord);
 
-        newRunningRecord.setResult(ApproveResult.PENDING_APPROVED).setRemarks("").setId(null);
+        newRunningRecord.setResult(ApproveResult.PENDING_APPROVED).setRemarks("").setId(null).setAssignee(transfer);
         approveRunningRecordView.save(newRunningRecord);
 
         // 原有记录绑定转办审批记录
         runningRecord.setTransfer(transfer)
                      .setTransferMark(true)
-                     .setRemarks(remark)
-                     .setLastModifyTime(new Date())
-                     .setResult(ApproveResult.TRANSFER)
-                     .setTransferRecordId(newRunningRecord.getId());
+                     .setRemarks(remark).setLastModifyTime(new Date()).setResult(ApproveResult.TRANSFER).setTransferRecordId(newRunningRecord.getId());
         approveRunningRecordView.updateById(runningRecord);
 
         // 下一级审批人添加当前转办人员
-        approveInstance.getNextAssignees().add(currentLogin.getId());
+        approveInstance.getNextAssignees().add(transfer);
         approveInstanceView.updateById(approveInstance);
 
         // 通知审批人
+        approveRunningHelper.notifiedAssignee(transfer, currentLogin.getName() + "转办了一则审批给您！审批名称 ：" + approveInstance.getName());
+
         // 通知发起人【如果当前审批人就是发起人 则不做通知】
         if (!currentLogin.getId().equals(approveInstance.getInitiator())) {
-            approveRunningHelper.notifiedAssignee(approveInstance.getInitiator(), "审批已被驳回！审批名称 ：" + approveInstance.getName());
+            approveRunningHelper.notifiedAssignee(approveInstance.getInitiator(), "审批已被转办！审批名称 ：" + approveInstance.getName());
         }
     }
 
