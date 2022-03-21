@@ -109,7 +109,7 @@ public class ApproveRunningHelper {
      * @param instanceId 实例ID
      */
     public List<ApproveNodeRecord> findPendingApprovedNode(long instanceId) {
-        return approveNodeRecordView.findNextPendingApprovedNode(instanceId, ApproveResult.PENDING_APPROVED);
+        return approveNodeRecordView.findPendingApprovedNode(instanceId, ApproveResult.PENDING_APPROVED, null);
     }
 
     /**
@@ -169,8 +169,9 @@ public class ApproveRunningHelper {
      * @param instanceId      实例Id
      */
     @Transactional(rollbackFor = Exception.class)
-    public void generateMidRecord(int rejectNodeLevel, int currNodeLevel, long instanceId) {
+    public void generateMidRecord(int rejectNodeLevel, int currNodeLevel, long currNodeId, long instanceId) {
 
+        // TODO 是否优化为通过模板生成节点
         List<ApproveNodeRecord> midRecord = approveNodeRecordView.findByInstanceIdAndLevelBetween(instanceId, rejectNodeLevel, currNodeLevel);
 
         // 复制运行记录
@@ -179,13 +180,14 @@ public class ApproveRunningHelper {
                                                              .flatMap(nodeId -> approveRunningRecordView.findByNodeRecordId(nodeId).stream())
                                                              .collect(Collectors.toList());
 
-        midRecord.forEach(rd -> rd.setId(null));
+        // 初始化审批节点的结果 并标记这些节点为驳回重审
+        midRecord.forEach(rd -> rd.setId(null).setResult(ApproveResult.PENDING_APPROVED).setRejectMark(true).setRejectNodeId(currNodeId));
         approveNodeRecordView.saveBatch(midRecord);
 
         // 复制节点
         runningRecords.forEach(runningRecord -> {
             long newRunningRecordId = findNewRunningRecordId(runningRecord.getNodeRecordName(), midRecord);
-            runningRecord.setNodeRecordId(newRunningRecordId).setRemarks("").setLastModifyTime(new Date());
+            runningRecord.setId(null).setNodeRecordId(newRunningRecordId).setResult(ApproveResult.NONE).setRemarks("").setLastModifyTime(new Date());
         });
 
         approveRunningRecordView.saveBatch(runningRecords);

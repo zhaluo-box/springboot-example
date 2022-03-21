@@ -6,9 +6,13 @@ import com.example.boot.mybatis.plus.entiry.User;
 import com.example.boot.mybatis.plus.mapper.UserMapper;
 import com.example.boot.mybatis.plus.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created  on 2022/2/10 22:22:16
@@ -54,6 +58,27 @@ public class UserController {
     @PostMapping
     public void insertUser(@RequestBody User user) {
         userService.insert(user);
+    }
+
+    /**
+     * 根据ID列表 批量删除
+     */
+
+    @DeleteMapping
+    public ResponseEntity<Void> batchDelete(@RequestParam List<Long> ids) {
+        Assert.notNull(ids, "参数ids 为null");
+        Assert.isTrue(ids.size() > 0, "ids 数量为" + ids.size());
+        userService.batchDelete(ids);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("actions/batch-delete-ids-str/")
+    public ResponseEntity<Void> batchDeleteIdsStr(@RequestParam List<Long> ids) {
+        Assert.notNull(ids, "参数ids 为null");
+        Assert.isTrue(ids.size() > 0, "ids 数量为" + ids.size());
+        String idsStr = ids.stream().map(Object::toString).collect(Collectors.joining(","));
+        userService.batchDelete(idsStr);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }

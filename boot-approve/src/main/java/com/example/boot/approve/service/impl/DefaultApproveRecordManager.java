@@ -18,6 +18,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.Comparator;
 import java.util.Date;
@@ -94,14 +95,21 @@ public class DefaultApproveRecordManager implements ApproveRecordManager {
         approveInstance.setNextNodeId(nextNodeRecord.getId()).setNextNodeName(nextNodeRecord.getName()).setNextAssignees(nextAssignees);
         approveInstanceView.updateById(approveInstance);
 
-        String message = "有一则【" + model.getName() + "】审批带您处理!";
+        String message = "有一则【" + model.getName() + "】审批需要您处理!";
         approveRunningHelper.notifiedNextNodeAssignee(nextNodeRunningRecords, message, true);
 
     }
 
     @Override
-    public List<ApproveNodeRecord> listApproveNode(long instanceId) {
-        return approveNodeRecordView.list(instanceId, ApproveResult.APPROVED);
+    public List<ApproveNodeRecord> listApprovedNode(long instanceId) {
+        return approveNodeRecordView.list(instanceId, ApproveResult.APPROVED, false);
+    }
+
+    @Override
+    public List<ApproveNodeRecord> listRejectedAbleNode(long instanceId, long currNodeId, List<ApproveNodeRecord> nodeRecords) {
+        ApproveNodeRecord currNode = approveNodeRecordView.getById(currNodeId);
+        Assert.notNull(currNode, "节点ID 异常，当前节点可能已被删除！");
+        return nodeRecords.stream().filter(nodeRecord -> nodeRecord.getLevel() < currNode.getLevel()).collect(Collectors.toList());
     }
 
     private Stream<ApproveRunningRecord> getApproveRunningRecordStream(ApproveNodeRecord nodeRecord) {

@@ -23,18 +23,4 @@ public class MybatisPlusConfig {
         return interceptor;
     }
 
-    /**
-     * TODO 优化  批量执行 重点关心事务
-     * mybatis-spring 提供的批量操作, 配置了这个会影响mybatis_plus 插入返回主键， sqlSession 无法自动提交
-     */
-    //    @Bean
-    //    public SqlSessionTemplate sqlSessionBatchTemplate(SqlSessionFactory sqlSessionFactory) {
-    //        log.info("创建批量操作SqlSessionTemplate");
-    //        return new SqlSessionTemplate(sqlSessionFactory, ExecutorType.BATCH);
-    //    }
-
-    //    @Bean
-    //    public EasySqlInjector easySqlInjector() {
-    //        return new EasySqlInjector();
-    //    }
 }

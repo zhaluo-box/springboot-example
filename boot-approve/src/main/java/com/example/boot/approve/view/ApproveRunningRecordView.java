@@ -50,4 +50,14 @@ public class ApproveRunningRecordView extends ServiceImpl<ApproveRunningRecordMa
                                                                                   .eq(ApproveRunningRecord::getResult, ApproveResult.PENDING_APPROVED)
                                                                                   .ne(id > 0, ApproveRunningRecord::getId, id));
     }
+
+    /**
+     * 根据节点记录ID 删除关联的审批记录
+     *
+     * @param nodeIds 节点记录IDS
+     */
+    public void deleteAllByNodeIds(List<Long> nodeIds) {
+        getBaseMapper().delete(new QueryWrapper<ApproveRunningRecord>().lambda().in(ApproveRunningRecord::getNodeRecordId, nodeIds));
+    }
+    
 }

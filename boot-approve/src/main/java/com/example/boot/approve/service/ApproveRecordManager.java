@@ -22,5 +22,7 @@ public interface ApproveRecordManager {
      */
     void createInstance(long paramId, ApproveModel model, String reason);
 
-    List<ApproveNodeRecord> listApproveNode(long instanceId);
+    List<ApproveNodeRecord> listApprovedNode(long instanceId);
+
+    List<ApproveNodeRecord> listRejectedAbleNode(long instanceId, long currNodeId, List<ApproveNodeRecord> nodeRecords);
 }

@@ -1,6 +1,5 @@
 package com.example.boot.approve.service.impl;
 
-import com.example.boot.approve.common.exception.MesException;
 import com.example.boot.approve.common.utils.SecurityUtil;
 import com.example.boot.approve.entity.User;
 import com.example.boot.approve.entity.common.BaseApproveNode;
@@ -88,6 +87,7 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
 
         // 节点通过后的处理 决定是通知下一级审批人 还是审批结束了
         approveInstance.setResult(ApproveResult.IN_APPROVED).setLastModifyTime(new Date());
+        pendingApprovedNodes.remove(currNode);
         nodePostHandler(approveInstance, pendingApprovedNodes, currNode);
         approveInstanceView.updateById(approveInstance);
 
@@ -167,27 +167,32 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
         ApproveInstance approveInstance = approveWrapper.getApproveInstance();
         ApproveNodeRecord currNode = approveWrapper.getCurrNode();
         ApproveRunningRecord runningRecord = approveWrapper.getApproveRunningRecord();
-
-        // 有异或或者会签的情况，其他人将节点处理了 比如驳回与拒绝 就会找不到记录，因为真正的记录其实在上一节点
-        if (runningRecord == null) {
-            throw new MesException("已不存在您需要处理的节点记录，如有需要请查看审批详情！");
-        }
+        List<ApproveRunningRecord> currNodeApproveRunningRecords = approveWrapper.getCurrNodeApproveRunningRecords();
 
         ApproveNodeRecord rejectNode = approveNodeRecordView.getById(rejectNodeId);
 
-        // 查找节点  当前节点>= [需要重新生成的审批记录与审批节点]>= 驳回节点ID 生成节点记录并通知审批人
-        approveRunningHelper.generateMidRecord(rejectNode.getLevel(), currNode.getLevel(), instanceId);
-
         // 记录审批意见
+        runningRecord.setRemarks(remark).setLastModifyTime(new Date()).setResult(ApproveResult.REJECTED);
+        //                     .setRejectNodeId(rejectNodeId)
+        //                     .setRejectNodeLevel(rejectNode.getLevel());
+        approveRunningRecordView.updateById(runningRecord);
+
+        // 驳回  有多个审批的都需要将其他审批人置为无需处理
+        if (!BaseApproveNode.ApproveType.DIRECT.equals(currNode.getType())) {
+            approveRunningHelper.otherPendingApprovedRunningRecordHandler(runningRecord, currNodeApproveRunningRecords);
+        }
+
+        // 记录节点结果
         currNode.setResult(ApproveResult.REJECTED);
         approveNodeRecordView.updateById(currNode);
 
-        runningRecord.setRemarks(remark)
-                     .setLastModifyTime(new Date())
-                     .setResult(ApproveResult.REJECTED)
-                     .setRejectNodeId(rejectNodeId)
-                     .setRejectNodeLevel(rejectNode.getLevel());
-        approveRunningRecordView.updateById(runningRecord);
+        // 生成节点节点  当前节点>= [需要重新生成的审批记录与审批节点]>= 驳回节点ID 生成节点记录并通知审批人
+        approveRunningHelper.generateMidRecord(rejectNode.getLevel(), currNode.getLevel(), currNode.getId(), instanceId);
+
+        // 通知下一级（驳回节点的审批人）审批人进行审批
+        List<ApproveNodeRecord> pendingApprovedNode = approveRunningHelper.findPendingApprovedNode(instanceId);
+        nodePostHandler(approveInstance, pendingApprovedNode, currNode);
+        approveInstanceView.updateById(approveInstance);
 
         // TODO 登录人员信息最终需要替换
         // 通过登录人员的ID以及节点ID查询对应审批记录
@@ -240,7 +245,7 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
 
     /**
      * 节点后置处理
-     * 情景： 当前节点审批未通过， 不做任何处理
+     * 情景： 当前节点审批结果不是通过也不是驳回， 不做任何处理
      * 当前节点审批通过：检查是否还有待审批节点： 有 通知并更新实例下一级审批节点信息，没有则代表审批结束
      *
      * @param approveInstance      审批实例
@@ -251,7 +256,8 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
 
         ApproveResult currNodeResult = currNode.getResult();
 
-        if (!currNodeResult.equals(ApproveResult.APPROVED)) {
+        // 审批通过与驳回之外的结果直接返回
+        if (!currNodeResult.equals(ApproveResult.APPROVED) && !currNodeResult.equals(ApproveResult.REJECTED)) {
             return;
         }
 
@@ -259,14 +265,14 @@ public class DefaultApproveRuntimeService implements ApproveRuntimeService {
         final String message = "有一则【" + approveInstance.getName() + "】审批待您处理!";
         final String endMessage = "【" + approveInstance.getName() + "】审批已结束";
 
-        if (pendingApprovedNodes.size() < 2) {
+        if (pendingApprovedNodes.size() == 0) {
             approveInstance.setResult(ApproveResult.APPROVED);
             approveRunningHelper.notifiedAssignee(approveInstance.getInitiator(), endMessage);
             return;
         }
 
-        //  待审批节点数量大于1 代表还有审批节点 且当前节点是通过的
-        ApproveNodeRecord nextNode = pendingApprovedNodes.get(1);
+        //  待审批节点数量大于0 代表还有审批节点 且当前节点是通过的
+        ApproveNodeRecord nextNode = pendingApprovedNodes.get(0);
         List<ApproveRunningRecord> nextRunningRecords = approveRunningRecordView.findByNodeRecordId(nextNode.getId());
         List<Long> assignees = nextRunningRecords.stream()
                                                  .peek(runningRecord -> runningRecord.setResult(ApproveResult.PENDING_APPROVED).setLastModifyTime(new Date()))

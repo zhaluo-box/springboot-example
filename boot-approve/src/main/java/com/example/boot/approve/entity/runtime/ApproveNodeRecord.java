@@ -48,4 +48,15 @@ public class ApproveNodeRecord extends BaseApproveNode {
      */
     private long nodeConfigId;
 
+    /**
+     * 驳回重审标识， 默认为false, 在驳回操作时， 置为true 代表新生成的节点是驳回重审的节点
+     */
+    private boolean rejectMark;
+
+    /**
+     * * 这里存储的是发起驳回的那个节点的ID
+     * * 只有具有驳回重审标识的这个字段的ID 才有值>0
+     */
+    private long rejectNodeId;
+
 }

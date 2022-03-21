@@ -43,7 +43,7 @@ public class ApproveRecordController {
     }
 
     /**
-     * TODO 具体的逻辑实现
+     * TODO 逻辑优化，展示当前审批节点之前的节点 rejectedAbleNode();
      * 当前实例，已被审批的节点， 用于驳回查看
      *
      * @param instanceId 实例ID
@@ -51,7 +51,21 @@ public class ApproveRecordController {
      */
     @GetMapping("node-records/list-approve-nodes/")
     public ResponseEntity<List<ApproveNodeRecord>> listApprovedNode(@RequestParam long instanceId) {
-        return ResponseEntity.ok(approveRecordManager.listApproveNode(instanceId));
+        return ResponseEntity.ok(approveRecordManager.listApprovedNode(instanceId));
+    }
+
+    /**
+     * 查询支持驳回的节点 ： 已审批的节点且审批等级小于当前审批等级
+     *
+     * @param instanceId 实例ID
+     * @param currNodeId 当前节点ID
+     */
+    @GetMapping("node-records/list-reject-able-nodes/")
+    public ResponseEntity<List<ApproveNodeRecord>> rejectedAbleNode(@RequestParam long instanceId, @RequestParam long currNodeId) {
+
+        List<ApproveNodeRecord> approveNodeRecords = approveRecordValidator.verifyExistRejectAbleNode(instanceId, currNodeId);
+        ApproveNodeRecord currNode = approveRecordValidator.verifyNodeIsExist(currNodeId);
+        return ResponseEntity.ok(approveRecordManager.listRejectedAbleNode(instanceId, currNodeId, approveNodeRecords));
     }
 
     /**
@@ -59,7 +73,6 @@ public class ApproveRecordController {
      */
     @GetMapping("actions/get-pending-approves/")
     public ResponseEntity<Void> getPendingApprove() {
-
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

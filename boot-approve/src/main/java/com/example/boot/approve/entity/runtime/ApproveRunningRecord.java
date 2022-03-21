@@ -100,15 +100,15 @@ public class ApproveRunningRecord {
      */
     private long transferRecordId;
 
-    /**
-     * 驳回节点ID TODO 后期验证是否冗余
-     */
-    private long rejectNodeId;
-
-    /**
-     * 驳回节点等级
-     */
-    private long rejectNodeLevel;
+    //    /**
+    //     * 驳回节点ID
+    //     */
+    //    private long rejectNodeId;
+    //
+    //    /**
+    //     * 驳回节点等级
+    //     */
+    //    private long rejectNodeLevel;
 
     /**
      * 审批记录创建的时间

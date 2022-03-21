@@ -1,6 +1,7 @@
 package com.example.boot.approve.service.impl;
 
 import com.example.boot.approve.service.MessageService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +13,7 @@ import java.util.List;
  *
  * @author zl
  */
+@Slf4j
 @Service
 public class DefaultMessageService implements MessageService {
 
@@ -26,5 +28,7 @@ public class DefaultMessageService implements MessageService {
     @Transactional
     public void notifyMessage(long receiver, String message) {
         // TODO 消息保存到数据库
+
+        log.debug("================接受人 ： {}， 消息 ：  {}", receiver, message);
     }
 }
