@@ -14,9 +14,6 @@ import java.util.stream.Collectors;
  *
  * @author zl
  */
-
-//@MappedTypes(List.class)
-//@MappedJdbcTypes({ JdbcType.VARCHAR })
 public class ListToStringTypeHandler extends AbstractJsonTypeHandler<List<Long>> {
     @Override
     public List<Long> parse(String json) {
