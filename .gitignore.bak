@@ -34,7 +34,3 @@ build/
 /*.iml
 
 **/**.gz
-**/.mvn/wrapper/maven-wrapper.jar
-*.cmd
-*/mvnw
-*.jar
