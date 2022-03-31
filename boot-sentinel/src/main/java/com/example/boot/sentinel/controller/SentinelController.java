@@ -20,7 +20,7 @@ public class SentinelController {
     private SentinelService sentinelService;
 
     @GetMapping("actions/test-annotation/")
-    public String testSentinelAnnotation(@RequestParam String param) {
+    public String testSentinelAnnotation(@RequestParam(required = false) String param) {
         return sentinelService.testAnnotation(param);
     }
 
