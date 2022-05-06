@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.13.10:3306/boot-mybatis-plus?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    url: jdbc:mysql://127.0.0.1:3306/boot-mybatis-plus?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
     username: root
     password: root
 mybatis-plus:
@@ -10,3 +10,12 @@ mybatis-plus:
 
 server:
   port: 9090
+
+logging:
+  file:
+    name: boot-mybatis-plus.log
+    path: /logs/
+  level:
+    root: info
+    #    org.springframework.web: DEBUG
+    org.apache.ibatis.logging.stdout.StdOutImpl: info

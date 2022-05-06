@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.apache.ibatis.type.JdbcType;
 
 import java.util.Date;
@@ -15,6 +17,8 @@ import java.util.Date;
  * @author zl
  */
 @Data
+@ToString
+@Accessors(chain = true)
 @TableName(value = "user", autoResultMap = true)
 public class User {
     @TableId(type = IdType.AUTO)

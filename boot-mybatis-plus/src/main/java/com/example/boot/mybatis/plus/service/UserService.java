@@ -37,4 +37,5 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     public void batchDelete(String ids) {
         userMapper.deleteByIdsStr(ids);
     }
+
 }
