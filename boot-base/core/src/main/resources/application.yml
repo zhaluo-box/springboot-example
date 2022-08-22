@@ -65,9 +65,8 @@ spring:
 logging:
   level:
     root: info
-    #    org.springframework.web: DEBUG
     com.example.boot.base: debug
     org.springframework.web.servlet: debug
   file:
-    name: log/boot-base.log
-#  path: C:/logTemp/log
+    name: /home/logs/${spring.application.name}/${spring.application.name}.log
+
