@@ -9,10 +9,10 @@ spring:
 mybatis-plus:
   type-aliases-package: com.example.boot.mybatis.plus.entity
   configuration:
-    map-underscore-to-camel-case: true #驼峰自动映射
+    map-underscore-to-camel-case: true
     lazy-loading-enabled: true
     multiple-result-sets-enabled: true
-    log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl  # 日志实现方案
+    log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl
   global-config:
     banner: false
     db-config:
