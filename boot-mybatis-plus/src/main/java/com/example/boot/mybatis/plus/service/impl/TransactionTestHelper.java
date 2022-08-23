@@ -1,6 +1,6 @@
 package com.example.boot.mybatis.plus.service.impl;
 
-import com.example.boot.mybatis.plus.entiry.User;
+import com.example.boot.mybatis.plus.entity.User;
 import com.example.boot.mybatis.plus.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -1,7 +1,7 @@
 package com.example.boot.mybatis.plus.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.boot.mybatis.plus.entiry.User;
+import com.example.boot.mybatis.plus.entity.User;
 import com.example.boot.mybatis.plus.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

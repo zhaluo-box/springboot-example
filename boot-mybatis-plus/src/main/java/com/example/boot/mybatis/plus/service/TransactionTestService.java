@@ -1,7 +1,7 @@
 package com.example.boot.mybatis.plus.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.boot.mybatis.plus.entiry.User;
+import com.example.boot.mybatis.plus.entity.User;
 
 /**
  * Created  on 2022/5/6 14:14:46

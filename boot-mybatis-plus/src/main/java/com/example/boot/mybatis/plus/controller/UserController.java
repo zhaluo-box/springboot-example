@@ -1,8 +1,7 @@
 package com.example.boot.mybatis.plus.controller;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.example.boot.mybatis.plus.entiry.User;
+import com.example.boot.mybatis.plus.entity.User;
 import com.example.boot.mybatis.plus.mapper.UserMapper;
 import com.example.boot.mybatis.plus.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +29,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    /**
-     * 测试BaseMapper 自带的CRUD
-     */
 
     /**
      * 测试查询一个

@@ -1,21 +1,31 @@
 spring:
+  application:
+    name: boot-mybatis-plus
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/boot-mybatis-plus?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
     username: root
     password: root
 mybatis-plus:
+  type-aliases-package: com.example.boot.mybatis.plus.entity
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true #驼峰自动映射
+    lazy-loading-enabled: true
+    multiple-result-sets-enabled: true
+    log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl  # 日志实现方案
+  global-config:
+    banner: false
+    db-config:
+      id-type: AUTO
+      table-underline: true
+  mapper-locations: classpath*:/mapper/**/*.xml
 
 server:
   port: 9090
 
 logging:
-  file:
-    name: boot-mybatis-plus.log
-    path: /logs/
   level:
     root: info
-    #    org.springframework.web: DEBUG
-    org.apache.ibatis.logging.stdout.StdOutImpl: info
+    com.example.boot.mybatis.plus.mapper: debug
+  file:
+    name: /home/logs/${spring.application.name}/${spring.application.name}.log

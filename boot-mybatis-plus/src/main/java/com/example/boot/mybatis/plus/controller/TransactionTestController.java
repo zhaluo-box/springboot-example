@@ -1,6 +1,6 @@
 package com.example.boot.mybatis.plus.controller;
 
-import com.example.boot.mybatis.plus.entiry.User;
+import com.example.boot.mybatis.plus.entity.User;
 import com.example.boot.mybatis.plus.service.TransactionTestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
 package com.example.boot.mybatis.plus.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.boot.mybatis.plus.entiry.User;
+import com.example.boot.mybatis.plus.entity.User;
 import com.example.boot.mybatis.plus.mapper.UserMapper;
 import com.example.boot.mybatis.plus.service.TransactionTestService;
 import lombok.extern.slf4j.Slf4j;

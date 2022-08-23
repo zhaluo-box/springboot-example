@@ -1,7 +1,7 @@
 package com.example.boot.mybatis.plus.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.example.boot.mybatis.plus.entiry.User;
+import com.example.boot.mybatis.plus.entity.User;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
