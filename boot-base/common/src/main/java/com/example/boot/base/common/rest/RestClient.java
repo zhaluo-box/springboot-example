@@ -13,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
  *
  */
 @Slf4j
-
 @AllArgsConstructor
 public abstract class RestClient {
 

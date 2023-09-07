@@ -1,5 +1,6 @@
 package com.example.boot.base.common.utils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionLikeType;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +41,39 @@ public final class JsonUtil {
             return objectMapper.readValue(json, javaType);
         } catch (Exception e) {
             log.error("将字符串：{}转为对象：{}时出错。", json, className);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 将Json转换指定类名的Java对像
+     *
+     * @param json      json字符串
+     * @param className 类名
+     * @return 指定类名的对像
+     */
+    public static <T> T toObject(String json, TypeReference<T> typeReference) {
+        try {
+            return objectMapper.readValue(json, typeReference);
+        } catch (Exception e) {
+            log.error("将字符串：{}转为对象：{}时出错。", json, typeReference);
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
+     * 将Json转换指定类名的Java对像
+     *
+     * @param json      json字符串
+     * @param type 类名
+     * @return 指定类名的对像
+     */
+    public static <T> T toObject(String json, Type type) {
+        try {
+            return objectMapper.readValue(json, objectMapper.getTypeFactory().constructType(type));
+        } catch (Exception e) {
+            log.error("将字符串：{}转为对象：{}时出错。", json, type);
             throw new RuntimeException(e);
         }
     }
@@ -105,6 +140,8 @@ public final class JsonUtil {
             throw new RuntimeException(e);
         }
     }
+
+
 
 
 }

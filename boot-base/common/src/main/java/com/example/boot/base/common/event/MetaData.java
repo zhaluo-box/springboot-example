@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
- *
+ * 是一些元信息，demo 中没什么用处，在 nest 中用于识别 分发到哪里，顺带 带上生产者信息与租户信息，以及目的服务
  */
 @AllArgsConstructor
 @NoArgsConstructor

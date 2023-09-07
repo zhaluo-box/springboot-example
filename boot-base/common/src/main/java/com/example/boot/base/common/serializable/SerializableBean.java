@@ -17,12 +17,12 @@ public class SerializableBean {
     protected Object targetBean;
 
     /**
-     * TODO　注释待补充
+     * targetBean.getClass().getTypeName();
      */
     protected String typeName;
 
     /**
-     * TODO  注释待补充
+     * json 后的数据 与targetBean 内容一样，只不过一个是对象，一个是json
      */
     protected String content;
 
